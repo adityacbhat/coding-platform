@@ -1,36 +1,200 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CodePrep - Coding Interview Preparation Platform
+
+A web-based coding practice platform for preparing for technical interviews. Solve problems by writing code, run against test cases, and get AI-powered feedback on your solutions.
+
+## Features
+
+- **Problem Practice**: Browse and solve coding problems with a built-in code editor
+- **Concept-based Learning**: Problems organized by concepts (Two Pointers, Sliding Window, Dynamic Programming, etc.)
+- **Company-specific Sets**: Practice problems tagged by companies (Google, Amazon, Meta, etc.)
+- **Test Case Validation**: Run your code against visible test cases, submit to check hidden tests
+- **Interview Prep Mode**: Generate randomized problem sets with configurable difficulty distribution
+- **AI Analysis** (stub ready): Analyze your solution for time/space complexity (requires LLM API key)
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Database**: Supabase (PostgreSQL)
+- **ORM**: Prisma 7
+- **UI**: Tailwind CSS 4
+- **Code Editor**: Monaco Editor
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- Supabase account (free tier works)
+- Python 3 (for code execution)
+
+### Installation
+
+1. Clone the repository and install dependencies:
+
+```bash
+cd coding-platform
+npm install
+```
+
+2. Set up Supabase:
+   - Create a project at [supabase.com](https://supabase.com)
+   - Go to Settings → Database → Connection string → Session pooler
+   - Copy the connection string
+
+3. Configure environment:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and add your Supabase connection string:
+```
+DATABASE_URL="postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-1-[REGION].pooler.supabase.com:5432/postgres"
+```
+
+4. Generate Prisma client:
+
+```bash
+npx prisma generate
+```
+
+5. Seed the database:
+
+```bash
+npm run db:seed
+```
+
+6. Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+coding-platform/
+├── prisma/
+│   ├── schema.prisma       # Database schema
+│   └── seed.ts             # Seed data script
+├── scripts/
+│   ├── import-problems.ts  # Problem import script
+│   └── sample-problems.json # Example import format
+├── src/
+│   ├── app/
+│   │   ├── page.tsx        # Landing page
+│   │   ├── dashboard/      # User dashboard
+│   │   ├── problems/       # Problem listing and workspace
+│   │   ├── concepts/       # Concept pages
+│   │   ├── companies/      # Company pages
+│   │   ├── interview/      # Interview prep mode
+│   │   └── api/
+│   │       ├── problems/   # Problems filter API
+│   │       ├── execute/    # Code execution with test cases
+│   │       ├── analyze/    # LLM analysis (stub)
+│   │       └── interview/  # Interview problem generation
+│   ├── components/
+│   │   ├── CodeEditor.tsx
+│   │   ├── ProblemClient.tsx
+│   │   ├── ProblemsClient.tsx
+│   │   ├── ProblemFilters.tsx
+│   │   └── InterviewClient.tsx
+│   └── lib/
+│       ├── db.ts           # Prisma client
+│       ├── queries.ts      # Database queries
+│       └── types.ts        # TypeScript types
+└── .env.example            # Environment template
+```
 
-## Learn More
+## Importing Problems
 
-To learn more about Next.js, take a look at the following resources:
+You can import problems from JSON files:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Import from JSON
+npm run import:problems -- scripts/sample-problems.json
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Preview without saving (dry run)
+npm run import:problems -- problems.json --dry-run
 
-## Deploy on Vercel
+# Update existing problems
+npm run import:problems -- problems.json --update
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### JSON Format
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```json
+[
+  {
+    "title": "Two Sum",
+    "slug": "two-sum",
+    "difficulty": "Easy",
+    "description": "Given an array...",
+    "starterCodePython": "class Solution:\n    def twoSum(self, nums, target):\n        pass",
+    "starterCodeJs": "var twoSum = function(nums, target) {\n};",
+    "concepts": ["hashing", "arrays"],
+    "companies": ["google", "amazon"],
+    "testCases": [
+      { "input": { "nums": [2,7,11,15], "target": 9 }, "expectedOutput": [0,1], "isHidden": false }
+    ],
+    "constraints": ["2 <= nums.length <= 10^4"],
+    "hints": ["Try using a hash map"]
+  }
+]
+```
+
+## LLM Integration
+
+The analyze endpoint is ready for LLM integration. To enable:
+
+1. Add your LLM API key to `.env`:
+```
+LLM_API_KEY=your_api_key_here
+```
+
+2. Implement the actual API call in `src/app/api/analyze/route.ts`
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Push to GitHub
+2. Import to Vercel
+3. Add environment variables:
+   - `DATABASE_URL` - Your Supabase connection string
+   - `LLM_API_KEY` (optional)
+
+### Other Platforms
+
+The app can be deployed anywhere that supports Next.js. Just ensure:
+- `DATABASE_URL` environment variable is set
+- Node.js 20+ runtime
+
+## Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run db:seed` - Seed the database
+- `npm run import:problems` - Import problems from file
+
+## Database Schema
+
+The database includes:
+
+- **problems** - Coding problems with descriptions, starter code
+- **test_cases** - Test cases for each problem (visible and hidden)
+- **concepts** - Coding concepts/patterns
+- **companies** - Company tags
+- **problem_concepts** - Many-to-many relation
+- **problem_companies** - Many-to-many relation
+- **users** - User accounts (prepared for auth)
+- **user_progress** - Track solved problems
+- **submissions** - Code submission history
+
+## License
+
+MIT

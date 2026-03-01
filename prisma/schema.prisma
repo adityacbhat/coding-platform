@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  progress    UserProgress[]
+  submissions Submission[]
+  playcards   Playcard[]
+
+  @@map("users")
+}
+
+model Problem {
+  id                Int      @id @default(autoincrement())
+  title             String
+  slug              String   @unique
+  difficulty        String
+  description       String
+  starterCodePython String   @map("starter_code_python")
+  starterCodeJs     String?  @map("starter_code_js")
+  constraints       Json?
+  hints             Json?
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  testCases   TestCase[]
+  concepts    ProblemConcept[]
+  companies   ProblemCompany[]
+  progress    UserProgress[]
+  submissions Submission[]
+
+  @@map("problems")
+}
+
+model TestCase {
+  id             Int     @id @default(autoincrement())
+  problemId      Int     @map("problem_id")
+  input          Json
+  expectedOutput Json    @map("expected_output")
+  isHidden       Boolean @default(false) @map("is_hidden")
+  orderIndex     Int     @default(0) @map("order_index")
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@map("test_cases")
+}
+
+model Concept {
+  id          Int     @id @default(autoincrement())
+  slug        String  @unique
+  title       String
+  description String
+  rationale   String?
+  subConcepts Json?   @map("sub_concepts")
+
+  problems ProblemConcept[]
+
+  @@map("concepts")
+}
+
+model Company {
+  id      Int     @id @default(autoincrement())
+  name    String  @unique
+  slug    String  @unique
+  logoUrl String? @map("logo_url")
+
+  problems ProblemCompany[]
+
+  @@map("companies")
+}
+
+model ProblemConcept {
+  problemId Int @map("problem_id")
+  conceptId Int @map("concept_id")
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  concept Concept @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+
+  @@id([problemId, conceptId])
+  @@map("problem_concepts")
+}
+
+model ProblemCompany {
+  problemId Int @map("problem_id")
+  companyId Int @map("company_id")
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([problemId, companyId])
+  @@map("problem_companies")
+}
+
+model UserProgress {
+  id        Int       @id @default(autoincrement())
+  userId    String    @map("user_id")
+  problemId Int       @map("problem_id")
+  status       String    @default("unsolved")
+  lastCode     String?   @map("last_code")
+  lastAnalysis Json?     @map("last_analysis")
+  lastResults  Json?     @map("last_results")
+  solvedAt     DateTime? @map("solved_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId])
+  @@map("user_progress")
+}
+
+model Submission {
+  id          Int      @id @default(autoincrement())
+  userId      String   @map("user_id")
+  problemId   Int      @map("problem_id")
+  code        String
+  language    String
+  result      String
+  testResults Json?    @map("test_results")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@map("submissions")
+}
+
+model Playcard {
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("user_id")
+  section   String
+  front     String
+  back      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("playcards")
+}
