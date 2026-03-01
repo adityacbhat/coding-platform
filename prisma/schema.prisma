@@ -102,11 +102,12 @@ model ProblemCompany {
 }
 
 model UserProgress {
-  id        Int       @id @default(autoincrement())
-  userId    String    @map("user_id")
-  problemId Int       @map("problem_id")
+  id           Int       @id @default(autoincrement())
+  userId       String    @map("user_id")
+  problemId    Int       @map("problem_id")
   status       String    @default("unsolved")
   lastCode     String?   @map("last_code")
+  lastAlgorithm String?  @map("last_algorithm")
   lastAnalysis Json?     @map("last_analysis")
   lastResults  Json?     @map("last_results")
   solvedAt     DateTime? @map("solved_at")

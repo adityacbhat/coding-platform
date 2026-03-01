@@ -20,18 +20,28 @@ export default async function ProblemPage({ params }: { params: Promise<{ slug: 
   const { data: { user } } = await supabase.auth.getUser();
 
   let savedCode: string | null = null;
+  let savedAlgorithm: string | null = null;
   let savedAnalysis: Record<string, unknown> | null = null;
   let savedResults: Record<string, unknown> | null = null;
 
   if (user) {
     const progress = await prisma.userProgress.findUnique({
       where: { userId_problemId: { userId: user.id, problemId: problem.id } },
-      select: { lastCode: true, lastAnalysis: true, lastResults: true },
+      select: { lastCode: true, lastAlgorithm: true, lastAnalysis: true, lastResults: true },
     });
     savedCode = progress?.lastCode ?? null;
+    savedAlgorithm = progress?.lastAlgorithm ?? null;
     savedAnalysis = (progress?.lastAnalysis as Record<string, unknown>) ?? null;
     savedResults = (progress?.lastResults as Record<string, unknown>) ?? null;
   }
 
-  return <ProblemClient problem={problem} savedCode={savedCode} savedAnalysis={savedAnalysis} savedResults={savedResults} />;
+  return (
+    <ProblemClient
+      problem={problem}
+      savedCode={savedCode}
+      savedAlgorithm={savedAlgorithm}
+      savedAnalysis={savedAnalysis}
+      savedResults={savedResults}
+    />
+  );
 }

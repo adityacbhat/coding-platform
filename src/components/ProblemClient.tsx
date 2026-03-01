@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import CodeEditor from '@/components/CodeEditor';
+import AlgorithmEditor from '@/components/AlgorithmEditor';
 import VisualizationView from '@/components/VisualizationView';
 import type { Problem, TestResult } from '@/lib/types';
 import type { VisualizationData } from '@/app/api/visualize/route';
@@ -11,6 +12,7 @@ import type { VisualizationData } from '@/app/api/visualize/route';
 type Props = {
   problem: Problem;
   savedCode: string | null;
+  savedAlgorithm: string | null;
   savedAnalysis: Record<string, unknown> | null;
   savedResults: Record<string, unknown> | null;
 };
@@ -32,8 +34,15 @@ type AnalysisData = {
   feedback: string;
 };
 
+type AlgorithmAnalysisData = {
+  onTrack: boolean;
+  validationMessage: string;
+  hints: string[];
+};
+
 type AnalysisResult = {
-  analysis: AnalysisData;
+  analysis: AnalysisData | AlgorithmAnalysisData;
+  source?: 'code' | 'algorithm';
 };
 
 type HintData = {
@@ -41,7 +50,7 @@ type HintData = {
   hints: string[];
 };
 
-export default function ProblemClient({ problem, savedCode, savedAnalysis, savedResults }: Props) {
+export default function ProblemClient({ problem, savedCode, savedAlgorithm, savedAnalysis, savedResults }: Props) {
   const [code, setCode] = useState(savedCode ?? problem.starterCodePython);
   const [language, setLanguage] = useState<'python' | 'javascript'>('python');
   const [output, setOutput] = useState('');
@@ -49,6 +58,10 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
   const [isRunning, setIsRunning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isAnalyzingAlgorithm, setIsAnalyzingAlgorithm] = useState(false);
+  const [algorithmText, setAlgorithmText] = useState(savedAlgorithm ?? '');
+  const [analysisSource, setAnalysisSource] = useState<'code' | 'algorithm'>('code');
+  const [editorView, setEditorView] = useState<'code' | 'algorithm'>('code');
   const [isHinting, setIsHinting] = useState(false);
   const [isGeneratingPlaycard, setIsGeneratingPlaycard] = useState(false);
   const [playcardToast, setPlaycardToast] = useState(false);
@@ -137,6 +150,7 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
   const analyzeCode = async () => {
     setIsAnalyzing(true);
     setAnalysisResult(null);
+    setAnalysisSource('code');
 
     const response = await fetch('/api/analyze', {
       method: 'POST',
@@ -152,6 +166,22 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
     const data = await response.json();
     setAnalysisResult(data);
     setIsAnalyzing(false);
+  };
+
+  const analyzeAlgorithm = async () => {
+    setIsAnalyzingAlgorithm(true);
+    setAnalysisResult(null);
+    setAnalysisSource('algorithm');
+
+    const response = await fetch('/api/analyze-algorithm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ algorithm: algorithmText, problemSlug: problem.slug }),
+    });
+
+    const data = await response.json();
+    setAnalysisResult(data);
+    setIsAnalyzingAlgorithm(false);
   };
 
   const getHint = async () => {
@@ -200,6 +230,18 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
     const t = setTimeout(() => setPlaycardToast(false), 6000);
     return () => clearTimeout(t);
   }, [playcardToast]);
+
+  // Debounced save of algorithm text (2s after user stops typing)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      fetch('/api/save-algorithm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ algorithm: algorithmText, problemSlug: problem.slug }),
+      });
+    }, 2000);
+    return () => clearTimeout(t);
+  }, [algorithmText, problem.slug]);
 
   const visualize = async (testCaseId: number, input: Record<string, unknown>, expectedOutput: unknown) => {
     setVizLoading(testCaseId);
@@ -649,8 +691,8 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
         />
 
         <div style={{ width: `${panelWidths[1]}%` }} className="flex flex-col h-full min-h-[500px] min-w-0 flex-shrink-0">
-          <div className="bg-slate-900 border border-violet-200/20 rounded-2xl overflow-hidden flex flex-col h-full shadow-lg shadow-violet-300/10">
-            <div className="bg-slate-800 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
+          <div className="bg-slate-900 border border-violet-200/20 rounded-2xl overflow-hidden flex flex-col flex-1 min-h-0 shadow-lg shadow-violet-300/10">
+            <div className="bg-slate-800 px-4 py-2 border-b border-slate-700 flex justify-between items-center flex-shrink-0">
               <div className="flex gap-2">
                 <button
                   onClick={() => handleLanguageChange('python')}
@@ -675,28 +717,65 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
                   </button>
                 )}
               </div>
-              <div className="flex gap-2">
-                <button 
-                  onClick={analyzeCode}
-                  disabled={isRunning || isSubmitting || isAnalyzing}
-                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white px-4 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                >
-                  {isAnalyzing ? 'Analysing…' : 'Analyse'}
-                </button>
-                <button 
-                  onClick={runCode}
-                  disabled={isRunning || isSubmitting || isAnalyzing}
-                  className="bg-slate-600 hover:bg-slate-500 disabled:bg-slate-600/50 text-white px-4 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                >
-                  {isRunning ? 'Running...' : 'Run'}
-                </button>
-                <button 
-                  onClick={submitCode}
-                  disabled={isRunning || isSubmitting || isAnalyzing}
-                  className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/50 text-white px-4 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit'}
-                </button>
+              <div className="flex gap-2 items-center">
+                <div className="flex rounded-lg overflow-hidden border border-slate-600">
+                  <button
+                    onClick={() => setEditorView('code')}
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                      editorView === 'code'
+                        ? 'bg-slate-600 text-white'
+                        : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    Code
+                  </button>
+                  <button
+                    onClick={() => setEditorView('algorithm')}
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                      editorView === 'algorithm'
+                        ? 'bg-cyan-600 text-white'
+                        : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Algorithm
+                  </button>
+                </div>
+                {editorView === 'code' ? (
+                  <>
+                    <button 
+                      onClick={analyzeCode}
+                      disabled={isRunning || isSubmitting || isAnalyzing || isAnalyzingAlgorithm}
+                      className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white px-4 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                    >
+                      {isAnalyzing ? 'Analysing…' : 'Analyse'}
+                    </button>
+                    <button 
+                      onClick={runCode}
+                      disabled={isRunning || isSubmitting || isAnalyzing || isAnalyzingAlgorithm}
+                      className="bg-slate-600 hover:bg-slate-500 disabled:bg-slate-600/50 text-white px-4 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                    >
+                      {isRunning ? 'Running...' : 'Run'}
+                    </button>
+                    <button 
+                      onClick={submitCode}
+                      disabled={isRunning || isSubmitting || isAnalyzing || isAnalyzingAlgorithm}
+                      className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/50 text-white px-4 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                    >
+                      {isSubmitting ? 'Submitting...' : 'Submit'}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={analyzeAlgorithm}
+                    disabled={isAnalyzingAlgorithm || isAnalyzing}
+                    className="bg-cyan-600 hover:bg-cyan-700 disabled:bg-cyan-600/50 text-white px-4 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                  >
+                    {isAnalyzingAlgorithm ? 'Analysing…' : 'Analyze this algorithm'}
+                  </button>
+                )}
                 <button
                   onClick={createPlaycard}
                   disabled={!testResults?.success || isGeneratingPlaycard || isRunning || isSubmitting}
@@ -720,12 +799,19 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
                 </button>
               </div>
             </div>
-            <div className="flex-grow relative">
-              <CodeEditor 
-                initialCode={code} 
-                onChange={(val) => setCode(val || '')} 
-                language={language} 
-              />
+            <div className="flex-grow relative min-h-0">
+              {editorView === 'code' ? (
+                <CodeEditor 
+                  initialCode={code} 
+                  onChange={(val) => setCode(val || '')} 
+                  language={language} 
+                />
+              ) : (
+                <AlgorithmEditor
+                  value={algorithmText}
+                  onChange={setAlgorithmText}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -743,12 +829,14 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
               <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-              <span className="text-sm font-medium text-slate-100">Analysis</span>
+              <span className="text-sm font-medium text-slate-100">
+                {analysisSource === 'algorithm' ? 'Algorithmic Analysis' : 'Analysis'}
+              </span>
             </div>
-            {analysisResult && !isAnalyzing && (
+            {analysisResult && !isAnalyzing && !isAnalyzingAlgorithm && (
               <button
-                onClick={analyzeCode}
-                disabled={isAnalyzing}
+                onClick={analysisSource === 'algorithm' ? analyzeAlgorithm : analyzeCode}
+                disabled={isAnalyzing || isAnalyzingAlgorithm}
                 className="text-xs bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-slate-300 px-3 py-1 rounded-lg font-medium transition-colors"
               >
                 Re-analyse
@@ -756,7 +844,7 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
             )}
           </div>
 
-          {isAnalyzing && (
+          {(isAnalyzing || isAnalyzingAlgorithm) && (
             <div className="soft-card p-10 rounded-2xl flex flex-col items-center justify-center gap-4">
               <div className="flex items-center gap-1.5">
                 {[0, 1, 2, 3, 4].map((i) => (
@@ -767,11 +855,13 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
                   />
                 ))}
               </div>
-              <p className="text-slate-500 text-base">Analysing your solution with Claude…</p>
+              <p className="text-slate-500 text-base">
+                {isAnalyzingAlgorithm ? 'Analysing your algorithm…' : 'Analysing your solution with Claude…'}
+              </p>
             </div>
           )}
 
-          {!isAnalyzing && !analysisResult && (
+          {!isAnalyzing && !isAnalyzingAlgorithm && !analysisResult && (
             <div className="space-y-3">
               <div className="soft-card p-6 rounded-2xl text-center space-y-4">
                 <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center mx-auto">
@@ -852,69 +942,136 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
             </div>
           )}
 
-          {!isAnalyzing && analysisResult && (
+          {!isAnalyzing && !isAnalyzingAlgorithm && analysisResult && analysisSource === 'algorithm' && (
             <div className="space-y-4">
-              <div className={`p-4 rounded-2xl border flex items-start gap-3 ${
-                analysisResult.analysis.isOptimal
-                  ? 'bg-emerald-50 border-emerald-200'
-                  : 'bg-amber-500/20 border-amber-500/30'
-              }`}>
-                <div className={`mt-0.5 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
-                  analysisResult.analysis.isOptimal ? 'bg-emerald-500/30' : 'bg-amber-500/30'
-                }`}>
-                  {analysisResult.analysis.isOptimal ? (
-                    <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z" />
-                    </svg>
-                  )}
-                </div>
-                <div>
-                  <p className={`text-base font-semibold mb-0.5 ${
-                    analysisResult.analysis.isOptimal ? 'text-emerald-400' : 'text-amber-400'
-                  }`}>
-                    {analysisResult.analysis.isOptimal ? 'Optimal Solution' : 'Not Optimal'}
-                  </p>
-                  <p className="text-slate-300 text-sm leading-relaxed">{analysisResult.analysis.optimalityExplanation}</p>
-                </div>
-              </div>
+              {(() => {
+                const algo = analysisResult.analysis as AlgorithmAnalysisData;
+                return (
+                  <>
+                    <div className={`p-4 rounded-2xl border flex items-start gap-3 ${
+                      algo.onTrack
+                        ? 'bg-emerald-500/20 border-emerald-500/30'
+                        : 'bg-cyan-500/20 border-cyan-500/30'
+                    }`}>
+                      <div className={`mt-0.5 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
+                        algo.onTrack ? 'bg-emerald-500/30' : 'bg-cyan-500/30'
+                      }`}>
+                        {algo.onTrack ? (
+                          <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        )}
+                      </div>
+                      <div>
+                        <p className={`text-base font-semibold mb-2 ${
+                          algo.onTrack ? 'text-emerald-400' : 'text-cyan-400'
+                        }`}>
+                          {algo.onTrack ? "You're on the right track" : 'Let\'s adjust your approach'}
+                        </p>
+                        <p className="text-slate-300 text-sm leading-relaxed">{algo.validationMessage}</p>
+                      </div>
+                    </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="soft-card p-3 rounded-2xl space-y-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                    <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Time</span>
-                  </div>
-                  <p className="text-2xl font-bold font-mono text-slate-100">{analysisResult.analysis.timeComplexity}</p>
-                  <p className="text-sm text-slate-500 leading-relaxed">{analysisResult.analysis.timeComplexityReason}</p>
-                </div>
-                <div className="soft-card p-3 rounded-2xl space-y-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-violet-500" />
-                    <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Space</span>
-                  </div>
-                  <p className="text-2xl font-bold font-mono text-slate-100">{analysisResult.analysis.spaceComplexity}</p>
-                  <p className="text-sm text-slate-500 leading-relaxed">{analysisResult.analysis.spaceComplexityReason}</p>
-                </div>
-              </div>
+                    {algo.hints && algo.hints.length > 0 && (
+                      <div className="soft-card p-4 rounded-2xl space-y-2">
+                        <div className="flex items-center gap-2 mb-1">
+                          <svg className="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                          </svg>
+                          <span className="text-base font-medium text-slate-100">Hints</span>
+                        </div>
+                        <ul className="space-y-2">
+                          {algo.hints.map((hint, i) => (
+                            <li key={i} className="flex gap-3">
+                              <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/30 border border-cyan-500/50 text-cyan-400 text-xs font-bold flex items-center justify-center mt-0.5">
+                                {i + 1}
+                              </span>
+                              <p className="text-slate-300 text-sm leading-relaxed">{hint}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          )}
 
-              <div className="soft-card p-4 rounded-2xl space-y-2">
-                <div className="flex items-center gap-2 mb-1">
-                  <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                  </svg>
-                  <span className="text-base font-medium text-slate-100">Feedback</span>
-                </div>
-                <p className="text-slate-300 text-sm leading-relaxed">{analysisResult.analysis.feedback}</p>
-              </div>
+          {!isAnalyzing && !isAnalyzingAlgorithm && analysisResult && analysisSource === 'code' && (
+            <div className="space-y-4">
+              {(() => {
+                const codeAnalysis = analysisResult.analysis as AnalysisData;
+                return (
+                  <>
+                    <div className={`p-4 rounded-2xl border flex items-start gap-3 ${
+                      codeAnalysis.isOptimal
+                        ? 'bg-emerald-500/20 border-emerald-500/30'
+                        : 'bg-amber-500/20 border-amber-500/30'
+                    }`}>
+                      <div className={`mt-0.5 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
+                        codeAnalysis.isOptimal ? 'bg-emerald-500/30' : 'bg-amber-500/30'
+                      }`}>
+                        {codeAnalysis.isOptimal ? (
+                          <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z" />
+                          </svg>
+                        )}
+                      </div>
+                      <div>
+                        <p className={`text-base font-semibold mb-0.5 ${
+                          codeAnalysis.isOptimal ? 'text-emerald-400' : 'text-amber-400'
+                        }`}>
+                          {codeAnalysis.isOptimal ? 'Optimal Solution' : 'Not Optimal'}
+                        </p>
+                        <p className="text-slate-300 text-sm leading-relaxed">{codeAnalysis.optimalityExplanation}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="soft-card p-3 rounded-2xl space-y-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Time</span>
+                        </div>
+                        <p className="text-2xl font-bold font-mono text-slate-100">{codeAnalysis.timeComplexity}</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">{codeAnalysis.timeComplexityReason}</p>
+                      </div>
+                      <div className="soft-card p-3 rounded-2xl space-y-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2 h-2 rounded-full bg-violet-500" />
+                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Space</span>
+                        </div>
+                        <p className="text-2xl font-bold font-mono text-slate-100">{codeAnalysis.spaceComplexity}</p>
+                        <p className="text-sm text-slate-500 leading-relaxed">{codeAnalysis.spaceComplexityReason}</p>
+                      </div>
+                    </div>
+
+                    <div className="soft-card p-4 rounded-2xl space-y-2">
+                      <div className="flex items-center gap-2 mb-1">
+                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                        </svg>
+                        <span className="text-base font-medium text-slate-100">Feedback</span>
+                      </div>
+                      <p className="text-slate-300 text-sm leading-relaxed">{codeAnalysis.feedback}</p>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           )}
 
           {/* Hint section — always shown below analysis results */}
-          {!isAnalyzing && analysisResult && (
+          {!isAnalyzing && !isAnalyzingAlgorithm && analysisResult && (
             <div className="border-t border-slate-700 pt-4 space-y-3">
               {!isHinting && !hintResult && (
                 <button
