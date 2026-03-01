@@ -100,20 +100,38 @@ Rules:
 - first_divergence_step: the step number where behaviour first differs from correct. -1 if no divergence.
 
 Mermaid flowchart rules (CRITICAL — every violation causes a render failure):
-- Use "flowchart TD" (never "graph").
+- Start with exactly: flowchart TD
 - ALWAYS wrap every node label in double quotes: A["label"], B{"label"}, C("label").
 - NEVER use these characters inside any label — they break the Mermaid parser:
-    [ ]  { }  |  < >  "
+    [ ]  { }  |  < >  "  #  &  ;
   Rephrase to avoid them entirely. Examples:
     BAD:  B{"i != d[stack[-1]]?"}    GOOD: B{"i not equal to stack top?"}
     BAD:  C["push char | update i"]  GOOD: C["push char, update i"]
     BAD:  D{"len > 0?"}              GOOD: D{"length greater than 0?"}
-- Node IDs: simple alphanumeric only (A, B, nodeCheck, step1). No spaces or special chars.
+    BAD:  E["i < len(s)"]            GOOD: E{"i less than length?"}
+- Node IDs: simple alphanumeric only (A, B, loopCheck, step1). No spaces, hyphens, or special chars.
+- Edges: use --> for arrows, add labels with |text| on arrows if needed: A -->|Yes| B
 - Mark the error node: style errorNodeId fill:#7f1d1d,stroke:#ef4444,color:#fecaca
 - Keep compact: 8–12 nodes max. Show key decisions and the divergence point.
-- Each node label MUST end with a line reference using a middle dot: " · L{n}"
-  Examples: A["Initialize stack · L1"], B{"Stack empty? · L7"}, C["Return False · L10"]
-  Use the actual line number from the student's code that this node represents.
+- Each node label MUST end with a line reference: " · L{n}"
+  Examples: A["Initialize vars · L3"], B{"j less than length? · L6"}, C["Return result · L13"]
+  
+EXAMPLE of valid flowchart:
+flowchart TD
+    A["Initialize i, j, longest · L3"]
+    B{"j less than length? · L6"}
+    C{"chars equal? · L7"}
+    D["increment j · L8"]
+    E["increment i, reset j · L11"]
+    F["Return longest · L13"]
+    A --> B
+    B -->|Yes| C
+    B -->|No| F
+    C -->|Yes| D
+    C -->|No| E
+    D --> B
+    E --> B
+    style E fill:#7f1d1d,stroke:#ef4444,color:#fecaca
 
 execution_path rules:
 - This is the ordered sequence of nodes actually visited during execution of this specific input.

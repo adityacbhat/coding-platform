@@ -84,11 +84,17 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
       const clean = sanitizeMermaid(code);
       // Validate syntax before rendering to avoid Mermaid's built-in error overlay
       const valid = await mermaid.parse(clean, { suppressErrors: true });
-      if (!valid) throw new Error('Mermaid syntax error — try re-visualizing.');
+      if (!valid) {
+        console.error('Mermaid parse failed. Sanitized code:', clean);
+        throw new Error('Mermaid syntax error — try re-visualizing.');
+      }
       const { svg: rendered } = await mermaid.render(`amd-${uid}`, clean);
       if (!cancelled) setSvg(rendered);
     };
-    render().catch((e: Error) => { if (!cancelled) setRenderError(e.message); });
+    render().catch((e: Error) => { 
+      console.error('Mermaid render error:', e, '\nOriginal code:', code);
+      if (!cancelled) setRenderError(e.message); 
+    });
     return () => { cancelled = true; };
   }, [code, uid]);
 

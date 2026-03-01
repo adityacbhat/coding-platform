@@ -5,6 +5,15 @@
 export function sanitizeMermaid(raw: string): string {
   let s = raw;
 
+  // 0. Ensure it starts with flowchart directive
+  s = s.trim();
+  if (!s.toLowerCase().startsWith('flowchart') && !s.toLowerCase().startsWith('graph')) {
+    s = 'flowchart TD\n' + s;
+  }
+  
+  // Replace "graph" with "flowchart" if used
+  s = s.replace(/^graph\s+(TD|TB|BT|RL|LR)/im, 'flowchart $1');
+
   // 1. Strip HTML line-breaks and tags from labels
   s = s.replace(/<br\s*\/?>/gi, ' ');
   s = s.replace(/<[^>]+>/g, '');
@@ -16,6 +25,9 @@ export function sanitizeMermaid(raw: string): string {
   //   "    →  '     (internal double-quotes close the string early)
   //   |    →  /     (pipe is used for edge labels in flowcharts)
   //   <>   →  ()    (angle brackets can be mistaken for HTML)
+  //   #    →  Nr    (hash can be interpreted as color)
+  //   &    →  and   (ampersand can break)
+  //   ;    →  ,     (semicolon can terminate)
   const q = (inner: string) => {
     if (inner.startsWith('"') && inner.endsWith('"')) {
       // already quoted — still sanitise the content inside
@@ -29,7 +41,10 @@ export function sanitizeMermaid(raw: string): string {
       .replace(/\}/g, ')')
       .replace(/\|/g, '/')
       .replace(/</g, '(')
-      .replace(/>/g, ')');
+      .replace(/>/g, ')')
+      .replace(/#/g, 'Nr')
+      .replace(/&/g, ' and ')
+      .replace(/;/g, ',');
     return `"${safe}"`;
   };
 
@@ -60,6 +75,12 @@ export function sanitizeMermaid(raw: string): string {
 
   // 5. Strip HTML inside style lines
   s = s.replace(/style\s+\S+\s+[^\n]*/g, (m) => m.replace(/<[^>]+>/g, ''));
+
+  // 6. Remove any empty lines at the start after the directive
+  const lines = s.split('\n');
+  const firstLine = lines[0];
+  const restLines = lines.slice(1).filter(l => l.trim() !== '' || l.includes('-->') || l.includes('---'));
+  s = [firstLine, ...restLines].join('\n');
 
   return s;
 }
