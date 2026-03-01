@@ -269,17 +269,17 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
           Rendering diagram…
         </div>
       ) : (
-        <div className="relative group">
+        <div className="relative">
           <div
             ref={mainRef}
             className="overflow-x-auto bg-slate-900/50 rounded-xl border border-slate-800 p-3"
             dangerouslySetInnerHTML={{ __html: svg }}
           />
-          {/* Expand button */}
+          {/* Expand button - always visible */}
           <button
             onClick={() => setIsExpanded(true)}
             title="Expand diagram"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity w-7 h-7 flex items-center justify-center rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white"
+            className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
@@ -296,7 +296,7 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
               key={i}
               onClick={() => { setIsPlaying(false); setFrame(i); }}
               title={f.event}
-              className={`rounded-full transition-all duration-200 ${
+              className={`rounded-full ${
                 i === frame
                   ? `w-3 h-3 ${
                       f.highlight === 'error'   ? 'bg-amber-400' :
@@ -535,7 +535,7 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
                 <div className="flex items-center gap-1 flex-wrap mb-3">
                   {path.map((f, i) => (
                     <button key={i} onClick={() => { setIsPlaying(false); setFrame(i); }} title={f.event}
-                      className={`rounded-full transition-all duration-200 ${
+                      className={`rounded-full ${
                         i === frame
                           ? `w-3 h-3 ${f.highlight === 'error' ? 'bg-amber-400' : f.highlight === 'success' ? 'bg-emerald-400' : 'bg-cyan-400'}`
                           : i < frame ? 'w-2 h-2 bg-slate-600' : 'w-2 h-2 bg-slate-800'

@@ -87,6 +87,11 @@ Goal: Produce a step-by-step execution trace, a Mermaid flowchart, and an animat
 Rules:
 - Mentally execute the code precisely for this input.
 - Track only 2–4 variables/structures that directly influence the result.
+- IMPORTANT: Also track derived/indexed values that are referenced in the code. For example:
+  - If the code has pointers i, j and an array s, also show s[i], s[j] as separate tracked variables
+  - If the code accesses nums[left], nums[right], show those current values
+  - If the code uses stack[-1] or peek operations, show the current top value
+  - These derived values help visualize what the code is actually comparing/using
 - Each trace step = one meaningful operation (one iteration, one push/pop/compare, one return).
 - "event" must be ≤ 10 words.
 - Cap at 18 trace steps. For long loops show first 2, a mid-point labelled "... N iterations ...", last 2.
@@ -114,6 +119,8 @@ execution_path rules:
 - "event": ≤10 words describing what happens at this node.
 - "line": the line number in the student's code that this node executes (1-indexed).
 - "state": current values of tracked variables as short strings (e.g. arrays as "[1,2]", booleans as "true").
+  Include both direct variables AND derived/indexed values being used at this step.
+  Example: if comparing s[i] and s[j], state should include: {"i": "0", "j": "5", "s[i]": "a", "s[j]": "b", "s": "[a,b,c,d,e,f]"}
 - "highlight":
     "normal"  — regular execution step
     "error"   — the node where the code does something wrong / diverges from expected
