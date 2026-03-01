@@ -51,6 +51,10 @@ export async function GET(request: NextRequest) {
     orderBy.title = sortOrder;
   } else if (sortBy === 'difficulty') {
     orderBy.difficulty = sortOrder;
+  } else if (sortBy === 'frequency') {
+    orderBy.frequency = sortOrder;
+  } else if (sortBy === 'acceptance') {
+    orderBy.acceptance = sortOrder;
   } else {
     orderBy.id = sortOrder;
   }
@@ -86,6 +90,8 @@ export async function GET(request: NextRequest) {
     title: p.title,
     slug: p.slug,
     difficulty: p.difficulty,
+    frequency: p.frequency,
+    acceptance: p.acceptance,
     concepts: p.concepts.map((pc) => pc.concept),
     companies: p.companies.map((pc) => pc.company),
   }));

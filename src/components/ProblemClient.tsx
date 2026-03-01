@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 import CodeEditor from '@/components/CodeEditor';
 import VisualizationView from '@/components/VisualizationView';
 import type { Problem, TestResult } from '@/lib/types';
@@ -366,7 +367,43 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
 
           {activeTab === 'description' && (
             <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl">
-              <p className="text-slate-300 leading-relaxed mb-6 whitespace-pre-wrap">{problem.description}</p>
+              <div className="prose prose-invert prose-sm max-w-none mb-6
+                prose-p:text-slate-300 prose-p:leading-relaxed prose-p:my-3
+                prose-strong:text-white prose-strong:font-semibold
+                prose-em:text-slate-200
+                prose-code:text-emerald-400 prose-code:bg-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
+                prose-pre:bg-slate-950 prose-pre:border prose-pre:border-slate-800 prose-pre:rounded-lg prose-pre:p-4
+                prose-ul:text-slate-300 prose-ul:my-2
+                prose-li:text-slate-300 prose-li:my-1
+                prose-headings:text-white prose-headings:font-semibold
+              ">
+                <ReactMarkdown
+                  components={{
+                    code: ({ className, children, ...props }) => {
+                      const isInline = !className;
+                      if (isInline) {
+                        return (
+                          <code className="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                            {children}
+                          </code>
+                        );
+                      }
+                      return (
+                        <code className={className} {...props}>
+                          {children}
+                        </code>
+                      );
+                    },
+                    pre: ({ children }) => (
+                      <pre className="bg-slate-950 border border-slate-800 rounded-lg p-4 overflow-x-auto text-sm">
+                        {children}
+                      </pre>
+                    ),
+                  }}
+                >
+                  {problem.description}
+                </ReactMarkdown>
+              </div>
               
               {problem.testCases && problem.testCases.length > 0 && (
                 <>
@@ -396,7 +433,7 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
                   <h3 className="text-md font-semibold text-white mb-3">Constraints</h3>
                   <ul className="list-disc list-inside text-slate-400 text-sm space-y-1">
                     {problem.constraints.map((constraint, idx) => (
-                      <li key={idx}>{constraint}</li>
+                      <li key={idx} className="font-mono">{constraint}</li>
                     ))}
                   </ul>
                 </div>

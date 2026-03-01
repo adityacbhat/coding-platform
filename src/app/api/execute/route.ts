@@ -72,30 +72,29 @@ export async function POST(request: NextRequest) {
       create: { id: user.id, email: user.email! },
     });
 
-    const newStatus = allPassed ? 'solved' : 'attempted';
-
-    // Only downgrade status if not already solved
     const existing = await prisma.userProgress.findUnique({
       where: { userId_problemId: { userId: user.id, problemId: problem.id } },
     });
 
-    if (!existing || existing.status !== 'solved' || allPassed) {
-      await prisma.userProgress.upsert({
-        where: { userId_problemId: { userId: user.id, problemId: problem.id } },
-        update: {
-          status: newStatus,
-          lastCode: code,
-          solvedAt: allPassed ? new Date() : existing?.solvedAt ?? null,
-        },
-        create: {
-          userId: user.id,
-          problemId: problem.id,
-          status: newStatus,
-          lastCode: code,
-          solvedAt: allPassed ? new Date() : null,
-        },
-      });
-    }
+    // Determine new status: only upgrade to 'solved' if all passed, never downgrade from 'solved'
+    const newStatus = allPassed ? 'solved' : (existing?.status === 'solved' ? 'solved' : 'attempted');
+
+    // Always save the latest code, but preserve solved status and solvedAt if already solved
+    await prisma.userProgress.upsert({
+      where: { userId_problemId: { userId: user.id, problemId: problem.id } },
+      update: {
+        status: newStatus,
+        lastCode: code,  // Always update to latest code
+        solvedAt: allPassed ? new Date() : existing?.solvedAt ?? null,
+      },
+      create: {
+        userId: user.id,
+        problemId: problem.id,
+        status: newStatus,
+        lastCode: code,
+        solvedAt: allPassed ? new Date() : null,
+      },
+    });
 
     const resultsPayload = JSON.stringify({
       success: allPassed,

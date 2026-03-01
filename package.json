@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "db:seed": "npx tsx prisma/seed.ts",
-    "import:problems": "npx tsx scripts/import-problems.ts"
+    "import:problems": "npx tsx scripts/import-problems.ts",
+    "scrape:leetcode": "npx tsx scripts/scrape-leetcode.ts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
@@ -20,6 +21,7 @@
     "@prisma/client": "^7.4.2",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.98.0",
+    "@tailwindcss/typography": "^0.5.19",
     "dotenv": "^17.3.1",
     "jsonrepair": "^3.13.2",
     "mermaid": "^11.12.3",
@@ -28,7 +30,9 @@
     "prisma": "^7.4.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "reactflow": "^11.11.4"
+    "react-markdown": "^10.1.0",
+    "reactflow": "^11.11.4",
+    "turndown": "^7.2.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -36,6 +40,7 @@
     "@types/pg": "^8.18.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/turndown": "^5.0.6",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",

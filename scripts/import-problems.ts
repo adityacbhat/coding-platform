@@ -60,6 +60,8 @@ type ProblemInput = {
   }[];
   constraints?: string[];
   hints?: string[];
+  frequency?: number;
+  acceptance?: number;
 };
 
 async function importFromJson(filePath: string): Promise<ProblemInput[]> {
@@ -215,8 +217,53 @@ async function importProblems(
           starterCodeJs: problem.starterCodeJs,
           constraints: problem.constraints,
           hints: problem.hints,
+          frequency: problem.frequency,
+          acceptance: problem.acceptance,
         },
       });
+
+      if (problem.testCases && problem.testCases.length > 0) {
+        await prisma.testCase.deleteMany({ where: { problemId: existing.id } });
+        for (let i = 0; i < problem.testCases.length; i++) {
+          const tc = problem.testCases[i];
+          await prisma.testCase.create({
+            data: {
+              problemId: existing.id,
+              input: tc.input as object,
+              expectedOutput: tc.expectedOutput as object,
+              isHidden: tc.isHidden ?? false,
+              orderIndex: i,
+            },
+          });
+        }
+      }
+
+      if (problem.concepts && problem.concepts.length > 0) {
+        await prisma.problemConcept.deleteMany({ where: { problemId: existing.id } });
+        for (const conceptSlug of problem.concepts) {
+          const conceptId = await ensureConceptExists(conceptSlug);
+          await prisma.problemConcept.create({
+            data: {
+              problemId: existing.id,
+              conceptId,
+            },
+          });
+        }
+      }
+
+      if (problem.companies && problem.companies.length > 0) {
+        await prisma.problemCompany.deleteMany({ where: { problemId: existing.id } });
+        for (const companySlug of problem.companies) {
+          const companyId = await ensureCompanyExists(companySlug);
+          await prisma.problemCompany.create({
+            data: {
+              problemId: existing.id,
+              companyId,
+            },
+          });
+        }
+      }
+
       console.log(`  Updated: ${problem.title}`);
       updated++;
     } else {
@@ -230,6 +277,8 @@ async function importProblems(
           starterCodeJs: problem.starterCodeJs,
           constraints: problem.constraints,
           hints: problem.hints,
+          frequency: problem.frequency,
+          acceptance: problem.acceptance,
         },
       });
 

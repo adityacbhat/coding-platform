@@ -19,7 +19,7 @@ export async function getProblems(): Promise<ProblemListItem[]> {
         },
       },
     },
-    orderBy: { id: 'asc' },
+    orderBy: { frequency: 'desc' },
   });
 
   return problems.map((p) => ({
@@ -27,6 +27,8 @@ export async function getProblems(): Promise<ProblemListItem[]> {
     title: p.title,
     slug: p.slug,
     difficulty: p.difficulty as 'Easy' | 'Medium' | 'Hard',
+    frequency: p.frequency,
+    acceptance: p.acceptance,
     concepts: p.concepts.map((pc) => pc.concept),
     companies: p.companies.map((pc) => pc.company),
   }));
@@ -164,7 +166,7 @@ export async function getProblemsByConcept(conceptSlug: string): Promise<Problem
         },
       },
     },
-    orderBy: { id: 'asc' },
+    orderBy: { frequency: 'desc' },
   });
 
   return problems.map((p) => ({
@@ -172,6 +174,8 @@ export async function getProblemsByConcept(conceptSlug: string): Promise<Problem
     title: p.title,
     slug: p.slug,
     difficulty: p.difficulty as 'Easy' | 'Medium' | 'Hard',
+    frequency: p.frequency,
+    acceptance: p.acceptance,
     concepts: p.concepts.map((pc) => pc.concept),
     companies: p.companies.map((pc) => pc.company),
   }));
@@ -249,7 +253,7 @@ export async function getProblemsByCompany(companySlug: string): Promise<Problem
         },
       },
     },
-    orderBy: { id: 'asc' },
+    orderBy: { frequency: 'desc' },
   });
 
   return problems.map((p) => ({
@@ -257,6 +261,8 @@ export async function getProblemsByCompany(companySlug: string): Promise<Problem
     title: p.title,
     slug: p.slug,
     difficulty: p.difficulty as 'Easy' | 'Medium' | 'Hard',
+    frequency: p.frequency,
+    acceptance: p.acceptance,
     concepts: p.concepts.map((pc) => pc.concept),
     companies: p.companies.map((pc) => pc.company),
   }));

@@ -12,24 +12,51 @@ type Props = {
   progressMap: Record<number, string>;
 };
 
+type SortConfig = {
+  key: 'title' | 'difficulty' | 'frequency';
+  order: 'asc' | 'desc';
+};
+
 export default function ProblemsClient({ initialProblems, concepts, companies, progressMap }: Props) {
   const [problems, setProblems] = useState(initialProblems);
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(true);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'frequency', order: 'desc' });
+  const [currentFilters, setCurrentFilters] = useState<FilterState | null>(null);
 
-  const handleFilterChange = useCallback(async (filters: FilterState) => {
+  const fetchProblems = useCallback(async (filters: FilterState | null, sort: SortConfig) => {
     setIsLoading(true);
 
     const params = new URLSearchParams();
-    filters.difficulty.forEach((d) => params.append('difficulty', d));
-    filters.concepts.forEach((c) => params.append('concept', c));
-    filters.companies.forEach((c) => params.append('company', c));
-    if (filters.search) params.set('search', filters.search);
+    if (filters) {
+      filters.difficulty.forEach((d) => params.append('difficulty', d));
+      filters.concepts.forEach((c) => params.append('concept', c));
+      filters.companies.forEach((c) => params.append('company', c));
+      if (filters.search) params.set('search', filters.search);
+    }
+    params.set('sortBy', sort.key);
+    params.set('sortOrder', sort.order);
 
     const response = await fetch(`/api/problems?${params.toString()}`);
     const data = await response.json();
     setProblems(data.problems);
     setIsLoading(false);
+  }, []);
+
+  const handleFilterChange = useCallback(async (filters: FilterState) => {
+    setCurrentFilters(filters);
+    await fetchProblems(filters, sortConfig);
+  }, [fetchProblems, sortConfig]);
+
+  const handleSort = useCallback((key: SortConfig['key']) => {
+    const newOrder = sortConfig.key === key && sortConfig.order === 'desc' ? 'asc' : 'desc';
+    const newSort = { key, order: newOrder as 'asc' | 'desc' };
+    setSortConfig(newSort);
+    fetchProblems(currentFilters, newSort);
+  }, [sortConfig, currentFilters, fetchProblems]);
+
+  useEffect(() => {
+    fetchProblems(null, sortConfig);
   }, []);
 
   return (
@@ -66,8 +93,39 @@ export default function ProblemsClient({ initialProblems, concepts, companies, p
             <thead className="bg-slate-900 text-xs uppercase text-slate-400 font-semibold">
               <tr>
                 <th className="px-6 py-4 w-12">Status</th>
-                <th className="px-6 py-4">Title</th>
-                <th className="px-6 py-4 w-28">Difficulty</th>
+                <th 
+                  className="px-6 py-4 cursor-pointer hover:text-slate-200 transition-colors"
+                  onClick={() => handleSort('title')}
+                >
+                  <div className="flex items-center gap-1">
+                    Title
+                    {sortConfig.key === 'title' && (
+                      <span>{sortConfig.order === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="px-6 py-4 w-28 cursor-pointer hover:text-slate-200 transition-colors"
+                  onClick={() => handleSort('difficulty')}
+                >
+                  <div className="flex items-center gap-1">
+                    Difficulty
+                    {sortConfig.key === 'difficulty' && (
+                      <span>{sortConfig.order === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
+                </th>
+                <th 
+                  className="px-6 py-4 w-24 cursor-pointer hover:text-slate-200 transition-colors"
+                  onClick={() => handleSort('frequency')}
+                >
+                  <div className="flex items-center gap-1">
+                    Frequency
+                    {sortConfig.key === 'frequency' && (
+                      <span>{sortConfig.order === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </div>
+                </th>
                 <th className="px-6 py-4">Concepts</th>
                 <th className="px-6 py-4">Companies</th>
               </tr>
@@ -75,7 +133,7 @@ export default function ProblemsClient({ initialProblems, concepts, companies, p
             <tbody className="divide-y divide-slate-800 bg-slate-950">
               {problems.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">
                     No problems match your filters.
                   </td>
                 </tr>
@@ -108,6 +166,21 @@ export default function ProblemsClient({ initialProblems, concepts, companies, p
                       problem.difficulty === 'Medium' ? 'text-amber-400' : 'text-rose-400'
                     }`}>
                       {problem.difficulty}
+                    </td>
+                    <td className="px-6 py-4">
+                      {problem.frequency ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 bg-slate-800 rounded-full h-2 overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                              style={{ width: `${problem.frequency}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-slate-400">{problem.frequency}%</span>
+                        </div>
+                      ) : (
+                        <span className="text-slate-600">—</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1">

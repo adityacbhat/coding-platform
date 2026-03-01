@@ -40,12 +40,14 @@ export type Problem = {
   starterCodeJs: string | null;
   constraints: string[] | null;
   hints: string[] | null;
+  frequency?: number | null;
+  acceptance?: number | null;
   concepts?: Pick<Concept, 'id' | 'slug' | 'title'>[];
   companies?: Pick<Company, 'id' | 'slug' | 'name'>[];
   testCases?: TestCase[];
 };
 
-export type ProblemListItem = Pick<Problem, 'id' | 'title' | 'slug' | 'difficulty'> & {
+export type ProblemListItem = Pick<Problem, 'id' | 'title' | 'slug' | 'difficulty' | 'frequency' | 'acceptance'> & {
   concepts: Pick<Concept, 'slug' | 'title'>[];
   companies: Pick<Company, 'slug' | 'name'>[];
 };
