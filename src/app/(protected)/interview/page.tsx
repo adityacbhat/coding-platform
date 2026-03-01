@@ -2,6 +2,7 @@ import { getCompanies } from '@/lib/queries';
 import InterviewClient from '@/components/InterviewClient';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function InterviewPage() {
   const companies = await getCompanies();

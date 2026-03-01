@@ -103,7 +103,7 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-3 mb-3">
                       <span className="text-slate-500 font-mono text-sm">
                         {String(index + 1).padStart(2, '0')}
                       </span>
@@ -111,7 +111,6 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
                         {subConcept.title}
                       </h3>
                     </div>
-                    <p className="text-slate-400 mb-4 pl-9">{subConcept.description}</p>
                     
                     <div className="pl-9">
                       <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">

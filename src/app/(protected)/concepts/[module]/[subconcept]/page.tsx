@@ -59,7 +59,11 @@ export default async function SubConceptPage({
 
       <div className="mb-10">
         <h1 className="text-4xl font-bold text-white mb-3">{subConcept.title}</h1>
-        <p className="text-xl text-slate-400">{subConcept.description}</p>
+        <div className="text-xl text-slate-400 space-y-4">
+          {subConcept.description.split('\n\n').map((para, i) => (
+            <p key={i} className="leading-relaxed">{para}</p>
+          ))}
+        </div>
       </div>
 
       <div className="bg-gradient-to-r from-blue-900/20 to-slate-900/50 border border-blue-800/30 rounded-xl p-6 mb-10">

@@ -10,6 +10,11 @@ const globalForPrisma = globalThis as unknown as {
 function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL;
   
+  if (!connectionString) {
+    console.warn('DATABASE_URL is not set. Database operations will fail.');
+    return new PrismaClient();
+  }
+  
   if (!globalForPrisma.pool) {
     globalForPrisma.pool = new Pool({ 
       connectionString,

@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db';
 import ProblemClient from '@/components/ProblemClient';
 
 export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const revalidate = 0;
 
 export default async function ProblemPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

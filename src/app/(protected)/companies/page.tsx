@@ -2,6 +2,7 @@ import { getCompanies } from '@/lib/queries';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function CompaniesPage() {
   const companies = await getCompanies();
