@@ -1,11 +1,8 @@
-import { getCompanyBySlug, getCompanySlugs, getProblemsByCompany } from '@/lib/queries';
+import { getCompanyBySlug, getProblemsByCompany } from '@/lib/queries';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-export async function generateStaticParams() {
-  const slugs = await getCompanySlugs();
-  return slugs.map((slug) => ({ slug }));
-}
+export const dynamic = 'force-dynamic';
 
 export default async function CompanyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

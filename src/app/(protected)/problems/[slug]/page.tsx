@@ -1,15 +1,10 @@
-import { getProblemBySlug, getProblemSlugs } from '@/lib/queries';
+import { getProblemBySlug } from '@/lib/queries';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/db';
 import ProblemClient from '@/components/ProblemClient';
 
 export const dynamic = 'force-dynamic';
-
-export async function generateStaticParams() {
-  const slugs = await getProblemSlugs();
-  return slugs.map((slug) => ({ slug }));
-}
 
 export default async function ProblemPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
