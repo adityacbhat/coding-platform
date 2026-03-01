@@ -84,6 +84,8 @@ Test case:
 
 Goal: Produce a step-by-step execution trace, a Mermaid flowchart, and an animation path that together make the bug visually obvious.
 
+IMPORTANT: Before generating the JSON, mentally execute the code line by line with the given input. Keep a mental "variable table" and update it at each step. Only after you have traced through the entire execution should you produce the output.
+
 Rules:
 - Mentally execute the code precisely for this input.
 - Track only 2–4 variables/structures that directly influence the result.
@@ -129,15 +131,18 @@ execution_path rules:
 - The same node_id may appear multiple times if the loop revisits it.
 - Cap at 20 frames.
 
-CRITICAL — Execution correctness:
-- You MUST actually execute the code mentally step by step with the given input values.
-- At each decision node (condition/comparison), evaluate the ACTUAL values at that moment.
-- Do NOT guess or approximate — compute the real comparison result.
-- For loop conditions: check if the condition is actually true or false with current variable values before deciding which branch to take.
-- For comparisons: substitute the actual values and determine the boolean result.
-- The execution path must reflect what the code ACTUALLY does, not what it should do or what seems logical.
-- Double-check each branch decision: if a condition evaluates to true, follow the true branch; if false, follow the false branch.
-- Common mistake to avoid: incorrectly evaluating loop termination conditions. Always verify the actual values being compared.
+CRITICAL — Execution correctness (READ CAREFULLY):
+- You MUST simulate the code as a computer would — mechanically, step by step, with zero shortcuts.
+- BEFORE outputting ANY decision node result, write out the comparison with actual values in your head:
+  - "j < len(s)" with j=3 and len(s)=8 → 3 < 8 → TRUE → continue loop
+  - "j < len(s)" with j=8 and len(s)=8 → 8 < 8 → FALSE → exit loop
+- NEVER skip iterations. If a loop runs 10 times, you must show those iterations (or summarize middle ones explicitly as "... N iterations ...").
+- NEVER jump variable values without showing the intermediate steps that changed them.
+- The execution_path "state" must show the ACTUAL variable values at that exact moment — these values must be consistent with what the code computes.
+- If at step N you have i=1, j=3, and the next step shows i=7, j=8, you have SKIPPED steps. This is WRONG.
+- Each loop iteration must be shown: check condition → body → update → check condition again.
+- When a condition check happens, the state must show the values BEING CHECKED, and the next node must be the CORRECT branch based on those actual values.
+- Think like a debugger: print(i, j) at every step. Your state values are those prints.
 
 Return ONLY the raw JSON — no markdown, no code fences, no extra text.
 
