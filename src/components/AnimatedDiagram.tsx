@@ -360,194 +360,205 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
 
       {/* Fullscreen modal */}
       {isExpanded && typeof document !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-50 flex flex-col bg-slate-950 overflow-hidden">
+        (() => {
+          // Collect ALL variable keys across all frames
+          const allVarKeys = new Set<string>();
+          path.forEach(f => Object.keys(f.state).forEach(k => allVarKeys.add(k)));
+          const sortedVarKeys = Array.from(allVarKeys).sort();
 
-          {/* ── Header ── */}
-          <div className="flex items-center gap-6 px-6 py-3 border-b border-slate-800 flex-shrink-0">
-            <span className="text-sm font-semibold text-slate-200 flex-shrink-0">Execution Flow</span>
+          return (
+            <div className="fixed inset-0 z-50 flex flex-col bg-slate-950 overflow-hidden">
 
-            {/* Test input */}
-            {!!testInput && (
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider flex-shrink-0">Input</span>
-                <span className="font-mono text-xs text-slate-300 truncate">
-                  {Object.entries(testInput as Record<string, unknown>).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join(', ')}
-                </span>
-              </div>
-            )}
+              {/* ── Header ── */}
+              <div className="flex items-center gap-6 px-6 py-3 border-b border-slate-800 flex-shrink-0">
+                <span className="text-sm font-semibold text-slate-200 flex-shrink-0">Execution Flow</span>
 
-            {/* Expected */}
-            {expectedOutput !== undefined && (
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Expected</span>
-                <span className="font-mono text-xs text-emerald-400">{JSON.stringify(expectedOutput)}</span>
-              </div>
-            )}
+                {/* Test input */}
+                {!!testInput && (
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider flex-shrink-0">Input</span>
+                    <span className="font-mono text-xs text-slate-300 truncate">
+                      {Object.entries(testInput as Record<string, unknown>).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join(', ')}
+                    </span>
+                  </div>
+                )}
 
-            {/* Step badge */}
-            {cur && (
-              <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ml-auto ${
-                cur.highlight === 'error'   ? 'bg-amber-500/20 text-amber-300' :
-                cur.highlight === 'success' ? 'bg-emerald-500/20 text-emerald-300' :
-                                              'bg-slate-700 text-slate-400'
-              }`}>
-                Step {frame + 1} / {path.length}
-              </span>
-            )}
+                {/* Expected */}
+                {expectedOutput !== undefined && (
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Expected</span>
+                    <span className="font-mono text-xs text-emerald-400">{JSON.stringify(expectedOutput)}</span>
+                  </div>
+                )}
 
-            <button onClick={() => setIsExpanded(false)}
-              className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {/* ── Body: diagram + variables side panel ── */}
-          <div className="flex flex-1 min-h-0">
-
-            {/* Diagram — fills available height, SVG scaled via useEffect */}
-            <div className="flex-1 min-w-0 min-h-0 p-6 flex items-center justify-center overflow-hidden">
-              <div
-                ref={modalRef}
-                className="w-full h-full"
-                dangerouslySetInnerHTML={{ __html: svg }}
-              />
-            </div>
-
-            {/* Variables panel */}
-            <div className="w-96 flex-shrink-0 border-l border-slate-800 flex flex-col min-h-0">
-              {/* Current event */}
-              {cur && (
-                <div className={`flex-shrink-0 px-4 py-3 border-b border-slate-800 ${
-                  cur.highlight === 'error'   ? 'bg-amber-900/20' :
-                  cur.highlight === 'success' ? 'bg-emerald-900/20' :
-                                                'bg-slate-900/60'
-                }`}>
-                  <p className={`text-xs font-semibold mb-0.5 ${
-                    cur.highlight === 'error'   ? 'text-amber-300' :
-                    cur.highlight === 'success' ? 'text-emerald-300' :
-                                                  'text-slate-200'
+                {/* Step badge */}
+                {cur && (
+                  <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ml-auto ${
+                    cur.highlight === 'error'   ? 'bg-amber-500/20 text-amber-300' :
+                    cur.highlight === 'success' ? 'bg-emerald-500/20 text-emerald-300' :
+                                                  'bg-slate-700 text-slate-400'
                   }`}>
-                    {cur.highlight === 'error' ? '⚑ ' : cur.highlight === 'success' ? '✓ ' : ''}
-                    {cur.event}
-                  </p>
-                  {cur.highlight === 'error' && (
-                    <p className="text-[11px] text-amber-400/70 mt-0.5">This is where it goes wrong</p>
-                  )}
-                </div>
-              )}
+                    Step {frame + 1} / {path.length}
+                  </span>
+                )}
 
-              {/* Code snippet for current line */}
-              {userCode && cur && cur.line > 0 && (() => {
-                const lines = userCode.split('\n');
-                const curLine = cur.line - 1; // 0-indexed
-                const start = Math.max(0, curLine - 4);
-                const end   = Math.min(lines.length - 1, curLine + 4);
-                const snippet = lines.slice(start, end + 1);
-                return (
-                  <div className="flex-shrink-0 border-b border-slate-800 bg-slate-950 px-4 py-3">
-                    <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest mb-2">Code · Line {cur.line}</p>
-                    <div className="space-y-0.5">
-                      {snippet.map((line, i) => {
-                        const lineNum = start + i + 1;
-                        const isActive = lineNum === cur.line;
-                        const isError  = isActive && cur.highlight === 'error';
-                        return (
-                          <div key={lineNum} className={`flex items-start gap-2 rounded px-1.5 py-1 ${
-                            isError  ? 'bg-amber-900/40' :
-                            isActive ? 'bg-sky-900/40'   : ''
-                          }`}>
-                            <span className={`text-xs font-mono select-none w-6 text-right flex-shrink-0 mt-px ${
-                              isActive ? (isError ? 'text-amber-400' : 'text-cyan-400') : 'text-slate-600'
-                            }`}>
-                              {lineNum}
-                            </span>
-                            <span className={`font-mono text-sm leading-snug break-all whitespace-pre-wrap ${
-                              isError  ? 'text-amber-200' :
-                              isActive ? 'text-cyan-200'  : 'text-slate-500'
-                            }`}>
-                              {line || ' '}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Variable list — scrollable */}
-              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-                <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">Variables</p>
-
-                {cur && Object.entries(cur.state).map(([key, val]) => {
-                  const prev = prevFrame?.state[key];
-                  const changed = prev !== undefined && JSON.stringify(val) !== JSON.stringify(prev);
-                  const isError = cur.highlight === 'error';
-
-                  return (
-                    <div key={key} className={`rounded-lg border px-3 py-2.5 space-y-1 ${
-                      changed && isError   ? 'border-amber-700/40 bg-amber-900/10' :
-                      changed             ? 'border-cyan-800/40 bg-cyan-900/10' :
-                                            'border-slate-800 bg-slate-900/40'
-                    }`}>
-                      <span className="text-[10px] font-mono font-medium text-slate-500 uppercase tracking-wider">
-                        {key}
-                      </span>
-
-                      {/* Previous value (strikethrough) if it changed */}
-                      {changed && prev !== undefined && (
-                        <p className="text-xs font-mono text-slate-600 line-through leading-snug">
-                          {prev}
-                        </p>
-                      )}
-
-                      {/* Current value */}
-                      <p className={`text-sm font-mono font-semibold leading-snug break-all ${
-                        changed && isError   ? 'text-amber-300' :
-                        changed             ? 'text-cyan-300' :
-                                              'text-slate-300'
-                      }`}>
-                        {val}
-                      </p>
-
-                      {changed && (
-                        <span className={`text-[10px] font-medium ${isError ? 'text-amber-500' : 'text-cyan-600'}`}>
-                          ↑ changed
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-
-                {/* Show unchanged vars from previous frame if current frame has none */}
-                {!cur && prevFrame && Object.entries(prevFrame.state).map(([key, val]) => (
-                  <div key={key} className="rounded-lg border border-slate-800 bg-slate-900/40 px-3 py-2.5">
-                    <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">{key}</span>
-                    <p className="text-sm font-mono font-semibold text-slate-300 mt-1">{val}</p>
-                  </div>
-                ))}
+                <button onClick={() => setIsExpanded(false)}
+                  className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
 
-              {/* Progress dots */}
-              <div className="flex-shrink-0 border-t border-slate-800 px-4 py-3">
-                <div className="flex items-center gap-1 flex-wrap mb-3">
-                  {path.map((f, i) => (
-                    <button key={i} onClick={() => { setIsPlaying(false); setFrame(i); }} title={f.event}
-                      className={`rounded-full ${
-                        i === frame
-                          ? `w-3 h-3 ${f.highlight === 'error' ? 'bg-amber-400' : f.highlight === 'success' ? 'bg-emerald-400' : 'bg-cyan-400'}`
-                          : i < frame ? 'w-2 h-2 bg-slate-600' : 'w-2 h-2 bg-slate-800'
-                      }`}
-                    />
-                  ))}
+              {/* ── Body: Code (left) | Diagram (center) | Variables (right) ── */}
+              <div className="flex flex-1 min-h-0">
+
+                {/* Left panel: Code */}
+                <div className="w-80 flex-shrink-0 border-r border-slate-800 flex flex-col min-h-0 bg-slate-950">
+                  {/* Current event header */}
+                  {cur && (
+                    <div className={`flex-shrink-0 px-4 py-3 border-b border-slate-800 ${
+                      cur.highlight === 'error'   ? 'bg-amber-900/20' :
+                      cur.highlight === 'success' ? 'bg-emerald-900/20' :
+                                                    'bg-slate-900/60'
+                    }`}>
+                      <p className={`text-xs font-semibold mb-0.5 ${
+                        cur.highlight === 'error'   ? 'text-amber-300' :
+                        cur.highlight === 'success' ? 'text-emerald-300' :
+                                                      'text-slate-200'
+                      }`}>
+                        {cur.highlight === 'error' ? '⚑ ' : cur.highlight === 'success' ? '✓ ' : ''}
+                        {cur.event}
+                      </p>
+                      {cur.highlight === 'error' && (
+                        <p className="text-[11px] text-amber-400/70 mt-0.5">This is where it goes wrong</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Full code with current line highlighted */}
+                  <div className="flex-1 overflow-y-auto px-3 py-3">
+                    <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest mb-2 px-1">
+                      Code {cur && cur.line > 0 && `· Line ${cur.line}`}
+                    </p>
+                    {userCode && (
+                      <div className="space-y-0">
+                        {userCode.split('\n').map((line, i) => {
+                          const lineNum = i + 1;
+                          const isActive = cur && lineNum === cur.line;
+                          const isError  = isActive && cur?.highlight === 'error';
+                          return (
+                            <div key={lineNum} className={`flex items-start gap-2 rounded px-1.5 py-0.5 ${
+                              isError  ? 'bg-amber-900/40' :
+                              isActive ? 'bg-sky-900/40'   : ''
+                            }`}>
+                              <span className={`text-[11px] font-mono select-none w-5 text-right flex-shrink-0 mt-px ${
+                                isActive ? (isError ? 'text-amber-400' : 'text-cyan-400') : 'text-slate-600'
+                              }`}>
+                                {lineNum}
+                              </span>
+                              <span className={`font-mono text-xs leading-snug whitespace-pre ${
+                                isError  ? 'text-amber-200' :
+                                isActive ? 'text-cyan-200'  : 'text-slate-400'
+                              }`}>
+                                {line || ' '}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {Controls}
+
+                {/* Center: Diagram */}
+                <div className="flex-1 min-w-0 min-h-0 flex flex-col">
+                  <div className="flex-1 p-6 flex items-center justify-center overflow-hidden">
+                    <div
+                      ref={modalRef}
+                      className="w-full h-full"
+                      dangerouslySetInnerHTML={{ __html: svg }}
+                    />
+                  </div>
+
+                  {/* Progress dots and controls at bottom of diagram */}
+                  <div className="flex-shrink-0 border-t border-slate-800 px-4 py-3 bg-slate-900/30">
+                    <div className="flex items-center justify-center gap-1 flex-wrap mb-3">
+                      {path.map((f, i) => (
+                        <button key={i} onClick={() => { setIsPlaying(false); setFrame(i); }} title={f.event}
+                          className={`rounded-full ${
+                            i === frame
+                              ? `w-3 h-3 ${f.highlight === 'error' ? 'bg-amber-400' : f.highlight === 'success' ? 'bg-emerald-400' : 'bg-cyan-400'}`
+                              : i < frame ? 'w-2 h-2 bg-slate-600' : 'w-2 h-2 bg-slate-800'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    {Controls}
+                  </div>
+                </div>
+
+                {/* Right panel: Variables - show ALL variables at every step */}
+                <div className="w-72 flex-shrink-0 border-l border-slate-800 flex flex-col min-h-0">
+                  <div className="flex-shrink-0 px-4 py-3 border-b border-slate-800 bg-slate-900/60">
+                    <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">Variables</p>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+                    {sortedVarKeys.map((key) => {
+                      const val = cur?.state[key];
+                      const prev = prevFrame?.state[key];
+                      const changed = prev !== undefined && val !== undefined && JSON.stringify(val) !== JSON.stringify(prev);
+                      const isError = cur?.highlight === 'error';
+                      const hasValue = val !== undefined;
+
+                      return (
+                        <div key={key} className={`rounded-lg border px-3 py-2 ${
+                          !hasValue               ? 'border-slate-800/50 bg-slate-900/20 opacity-50' :
+                          changed && isError      ? 'border-amber-700/40 bg-amber-900/10' :
+                          changed                 ? 'border-cyan-800/40 bg-cyan-900/10' :
+                                                    'border-slate-800 bg-slate-900/40'
+                        }`}>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[10px] font-mono font-medium text-slate-500">
+                              {key}
+                            </span>
+                            {changed && (
+                              <span className={`text-[9px] font-medium ${isError ? 'text-amber-500' : 'text-cyan-600'}`}>
+                                changed
+                              </span>
+                            )}
+                          </div>
+
+                          {hasValue ? (
+                            <div className="mt-1">
+                              {/* Previous value (strikethrough) if it changed */}
+                              {changed && prev !== undefined && (
+                                <p className="text-[11px] font-mono text-slate-600 line-through leading-snug">
+                                  {prev}
+                                </p>
+                              )}
+                              {/* Current value */}
+                              <p className={`text-sm font-mono font-semibold leading-snug break-all ${
+                                changed && isError   ? 'text-amber-300' :
+                                changed             ? 'text-cyan-300' :
+                                                      'text-slate-300'
+                              }`}>
+                                {val}
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="text-xs font-mono text-slate-600 mt-1">—</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>,
+          );
+        })(),
         document.body
       )}
     </div>
