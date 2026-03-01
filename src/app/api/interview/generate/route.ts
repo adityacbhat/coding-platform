@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { Prisma } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
   const mediumPercent = parseInt(searchParams.get('medium') || '60');
   const hardPercent = parseInt(searchParams.get('hard') || '20');
 
-  const where: Record<string, unknown> = {};
+  const where: Prisma.ProblemWhereInput = {};
 
   if (company) {
     where.companies = {
