@@ -8,10 +8,10 @@ export default async function InterviewPage() {
   const companies = await getCompanies();
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto animate-fade-in-up">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Interview Prep Mode</h1>
-        <p className="text-slate-400">
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">Interview Prep Mode</h1>
+        <p className="text-slate-500">
           Generate a randomized set of problems to practice for your upcoming interview.
         </p>
       </div>

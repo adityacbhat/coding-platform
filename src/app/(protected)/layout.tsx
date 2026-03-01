@@ -17,7 +17,7 @@ export default async function ProtectedLayout({
   return (
     <div className="flex min-h-screen">
       <AppSidebar email={user.email ?? ''} />
-      <main className="flex-1 overflow-auto bg-slate-950 px-8 py-8">
+      <main className="flex-1 overflow-auto px-8 py-8">
         {children}
       </main>
     </div>

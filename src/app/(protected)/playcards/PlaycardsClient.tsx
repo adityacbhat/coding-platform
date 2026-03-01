@@ -64,25 +64,23 @@ export default function PlaycardsClient() {
   const isFormOpen = adding || editingCard !== null;
 
   return (
-    <div className="max-w-5xl mx-auto">
-      {/* Page header */}
+    <div className="max-w-5xl mx-auto animate-fade-in-up">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 text-transparent bg-clip-text mb-1">
+        <h1 className="text-3xl font-bold gradient-text mb-1">
           Playcards
         </h1>
         <p className="text-slate-500 text-sm">Flash cards for quick revision — flip, navigate, repeat.</p>
       </div>
 
-      {/* Tab bar + add button */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-        <div className="flex bg-slate-800/60 rounded-xl p-1 gap-1 border border-slate-700/50">
+        <div className="flex bg-violet-100/30 rounded-xl p-1 gap-1 border border-violet-200/30">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeTab === tab.id
-                  ? 'bg-slate-700 text-white shadow'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-white/60 text-slate-800 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
               }`}
               onClick={() => setActiveTab(tab.id)}
             >
@@ -93,7 +91,7 @@ export default function PlaycardsClient() {
 
         {!isFormOpen && (
           <button
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-all hover:shadow-lg hover:shadow-indigo-500/25"
             onClick={() => setAdding(true)}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -105,12 +103,11 @@ export default function PlaycardsClient() {
         )}
       </div>
 
-      <div className="border-t border-slate-800 mb-8" />
+      <div className="border-t border-violet-200/30 mb-8" />
 
-      {/* Content area */}
       {loading ? (
         <div className="flex items-center justify-center py-28">
-          <div className="w-7 h-7 border-2 border-slate-600 border-t-slate-300 rounded-full animate-spin" />
+          <div className="w-7 h-7 border-2 border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
         </div>
       ) : adding ? (
         <div className="flex justify-center py-6">

@@ -82,33 +82,33 @@ export default function ProblemFilters({ concepts, companies, onFilterChange, in
           placeholder="Search problems..."
           value={filters.search}
           onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
-          className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+          className="w-full bg-white/40 border border-violet-200/30 rounded-xl px-4 py-2 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition"
         />
       </div>
 
       {hasActiveFilters && (
         <button
           onClick={clearFilters}
-          className="text-sm text-blue-400 hover:text-blue-300"
+          className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
         >
           Clear all filters
         </button>
       )}
 
       <div>
-        <h3 className="text-sm font-semibold text-white mb-3">Difficulty</h3>
+        <h3 className="text-sm font-semibold text-slate-700 mb-3">Difficulty</h3>
         <div className="space-y-2">
           {(['Easy', 'Medium', 'Hard'] as Difficulty[]).map((diff) => (
-            <label key={diff} className="flex items-center gap-2 cursor-pointer">
+            <label key={diff} className="flex items-center gap-2 cursor-pointer group">
               <input
                 type="checkbox"
                 checked={filters.difficulty.includes(diff)}
                 onChange={() => toggleDifficulty(diff)}
-                className="rounded bg-slate-800 border-slate-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900"
+                className="rounded bg-white border-slate-300 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0"
               />
-              <span className={`text-sm ${
-                diff === 'Easy' ? 'text-emerald-400' :
-                diff === 'Medium' ? 'text-amber-400' : 'text-rose-400'
+              <span className={`text-sm font-medium ${
+                diff === 'Easy' ? 'text-emerald-600' :
+                diff === 'Medium' ? 'text-amber-600' : 'text-rose-600'
               }`}>
                 {diff}
               </span>
@@ -120,7 +120,7 @@ export default function ProblemFilters({ concepts, companies, onFilterChange, in
       <div>
         <button
           onClick={() => setIsConceptsExpanded(!isConceptsExpanded)}
-          className="flex items-center justify-between w-full text-sm font-semibold text-white mb-3"
+          className="flex items-center justify-between w-full text-sm font-semibold text-slate-700 mb-3 hover:text-indigo-600 transition-colors"
         >
           <span>Concepts {filters.concepts.length > 0 && `(${filters.concepts.length})`}</span>
           <span className="text-slate-400">{isConceptsExpanded ? '−' : '+'}</span>
@@ -133,9 +133,9 @@ export default function ProblemFilters({ concepts, companies, onFilterChange, in
                   type="checkbox"
                   checked={filters.concepts.includes(concept.slug)}
                   onChange={() => toggleConcept(concept.slug)}
-                  className="rounded bg-slate-800 border-slate-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900"
+                  className="rounded bg-white border-slate-300 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0"
                 />
-                <span className="text-sm text-slate-300">{concept.title}</span>
+                <span className="text-sm text-slate-600">{concept.title}</span>
               </label>
             ))}
           </div>
@@ -145,7 +145,7 @@ export default function ProblemFilters({ concepts, companies, onFilterChange, in
       <div>
         <button
           onClick={() => setIsCompaniesExpanded(!isCompaniesExpanded)}
-          className="flex items-center justify-between w-full text-sm font-semibold text-white mb-3"
+          className="flex items-center justify-between w-full text-sm font-semibold text-slate-700 mb-3 hover:text-indigo-600 transition-colors"
         >
           <span>Companies {filters.companies.length > 0 && `(${filters.companies.length})`}</span>
           <span className="text-slate-400">{isCompaniesExpanded ? '−' : '+'}</span>
@@ -158,9 +158,9 @@ export default function ProblemFilters({ concepts, companies, onFilterChange, in
                   type="checkbox"
                   checked={filters.companies.includes(company.slug)}
                   onChange={() => toggleCompany(company.slug)}
-                  className="rounded bg-slate-800 border-slate-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900"
+                  className="rounded bg-white border-slate-300 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0"
                 />
-                <span className="text-sm text-slate-300">{company.name}</span>
+                <span className="text-sm text-slate-600">{company.name}</span>
               </label>
             ))}
           </div>

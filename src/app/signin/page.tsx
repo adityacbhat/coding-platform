@@ -31,17 +31,25 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-full max-w-md">
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 space-y-6">
+    <div className="flex items-center justify-center min-h-screen relative overflow-hidden">
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute top-[-15%] right-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-100/60 blur-3xl animate-float-slow" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] rounded-full bg-violet-100/50 blur-3xl animate-breathe" />
+      </div>
+
+      <div className="w-full max-w-md animate-scale-in">
+        <div className="text-center mb-8">
+          <Link href="/" className="text-2xl font-bold gradient-text">CodePrep</Link>
+        </div>
+        <div className="bg-white/40 backdrop-blur-xl border border-violet-200/30 rounded-2xl p-8 space-y-6 shadow-xl shadow-violet-300/10">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-            <p className="text-slate-400 mt-1 text-sm">Sign in to your CodePrep account</p>
+            <h1 className="text-2xl font-bold text-slate-800">Welcome back</h1>
+            <p className="text-slate-500 mt-1 text-sm">Sign in to your CodePrep account</p>
           </div>
 
           <form onSubmit={handleSignIn} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1.5">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-600 mb-1.5">
                 Email
               </label>
               <input
@@ -51,12 +59,12 @@ export default function SignInPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="you@example.com"
-                className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full bg-white/40 border border-violet-200/30 text-slate-800 placeholder-slate-400 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-1.5">
+              <label htmlFor="password" className="block text-sm font-medium text-slate-600 mb-1.5">
                 Password
               </label>
               <input
@@ -66,12 +74,12 @@ export default function SignInPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
-                className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full bg-white/40 border border-violet-200/30 text-slate-800 placeholder-slate-400 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition"
               />
             </div>
 
             {error && (
-              <p className="text-rose-400 text-sm bg-rose-400/10 border border-rose-400/20 rounded-lg px-4 py-2.5">
+              <p className="text-rose-600 text-sm bg-rose-50 border border-rose-200 rounded-xl px-4 py-2.5">
                 {error}
               </p>
             )}
@@ -79,15 +87,15 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition-colors"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition-all hover:shadow-lg hover:shadow-indigo-500/25"
             >
               {loading ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
 
-          <p className="text-center text-sm text-slate-400">
+          <p className="text-center text-sm text-slate-500">
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-blue-400 hover:text-blue-300 font-medium">
+            <Link href="/signup" className="text-indigo-600 hover:text-indigo-700 font-medium">
               Sign up
             </Link>
           </p>

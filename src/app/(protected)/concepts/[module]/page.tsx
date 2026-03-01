@@ -24,7 +24,7 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
     <div className="max-w-4xl mx-auto">
       <Link
         href="/concepts"
-        className="text-blue-400 hover:text-blue-300 text-sm mb-6 inline-flex items-center gap-1 transition-colors"
+        className="text-indigo-600 hover:text-indigo-700 font-medium text-sm mb-6 inline-flex items-center gap-1 transition-colors"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -34,18 +34,18 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
 
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-3">
-          <h1 className="text-4xl font-bold text-white">{module.title}</h1>
+          <h1 className="text-4xl font-bold text-slate-800">{module.title}</h1>
           {isPlaceholder && (
-            <span className="text-xs bg-amber-900/30 text-amber-400 px-2 py-1 rounded border border-amber-800/50">
+            <span className="text-xs bg-amber-50 text-amber-600 px-2 py-1 rounded border border-amber-200">
               Coming Soon
             </span>
           )}
         </div>
-        <p className="text-xl text-slate-400">{module.description}</p>
+        <p className="text-xl text-slate-500">{module.description}</p>
       </div>
 
       {prerequisites.length > 0 && (
-        <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 mb-8">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 mb-8">
           <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
             Prerequisites
           </h3>
@@ -54,7 +54,7 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
               <Link
                 key={prereq!.slug}
                 href={`/concepts/${prereq!.slug}`}
-                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm transition-colors border border-slate-700"
+                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm transition-colors border border-slate-200"
               >
                 {prereq!.title}
               </Link>
@@ -64,20 +64,20 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
       )}
 
       {isPlaceholder ? (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800 flex items-center justify-center">
-            <svg className="w-8 h-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 flex items-center justify-center">
+            <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">Content Coming Soon</h3>
+          <h3 className="text-xl font-semibold text-slate-800 mb-2">Content Coming Soon</h3>
           <p className="text-slate-400 max-w-md mx-auto">
             We're working on detailed patterns and problems for {module.title}. 
             Check back soon or explore other concepts in the meantime.
           </p>
           <Link
             href="/concepts"
-            className="inline-flex items-center gap-2 mt-6 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 mt-6 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors"
           >
             Explore Other Concepts
           </Link>
@@ -85,8 +85,8 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
       ) : (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-white">Patterns & Techniques</h2>
-            <span className="text-sm text-slate-500">
+            <h2 className="text-2xl font-bold text-slate-800">Patterns & Techniques</h2>
+            <span className="text-sm text-slate-400">
               {module.subConcepts.length} sub-concepts
             </span>
           </div>
@@ -96,7 +96,7 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
               <Link
                 key={subConcept.slug}
                 href={`/concepts/${module.slug}/${subConcept.slug}`}
-                className="group block bg-slate-900 border border-slate-800 rounded-xl p-6 hover:border-blue-500/50 hover:bg-slate-900/80 transition-all duration-200"
+                className="group block bg-white border border-slate-200 rounded-2xl p-6 hover:border-indigo-300 hover:shadow-md shadow-sm card-hover transition-all duration-200"
                 style={{
                   animationDelay: `${index * 0.1}s`,
                 }}
@@ -104,10 +104,10 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <span className="text-slate-500 font-mono text-sm">
+                      <span className="text-slate-400 font-mono text-sm">
                         {String(index + 1).padStart(2, '0')}
                       </span>
-                      <h3 className="text-xl font-semibold text-white group-hover:text-blue-400 transition-colors">
+                      <h3 className="text-xl font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">
                         {subConcept.title}
                       </h3>
                     </div>
@@ -118,8 +118,8 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
                       </h4>
                       <ul className="space-y-1">
                         {subConcept.whenToUse.slice(0, 2).map((use, i) => (
-                          <li key={i} className="text-sm text-slate-400 flex items-center gap-2">
-                            <span className="w-1 h-1 rounded-full bg-blue-500" />
+                          <li key={i} className="text-sm text-slate-500 flex items-center gap-2">
+                            <span className="w-1 h-1 rounded-full bg-indigo-500" />
                             {use}
                           </li>
                         ))}
@@ -127,8 +127,8 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3 text-slate-500 group-hover:text-blue-400 transition-colors">
-                    <span className="text-xs bg-slate-800 px-2 py-1 rounded">
+                  <div className="flex items-center gap-3 text-slate-400 group-hover:text-indigo-500 transition-colors">
+                    <span className="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg">
                       {subConcept.problems.length} problems
                     </span>
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -93,14 +93,14 @@ export default function ActivityCalendar({ activityData }: ActivityCalendarProps
     <div className="flex gap-10 items-start">
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-white">
+          <h3 className="text-sm font-semibold text-slate-700">
             {MONTH_NAMES[month]} {year}
           </h3>
         </div>
 
         <div className="grid grid-cols-7 gap-1 mb-1">
           {DAY_HEADERS.map((d) => (
-            <div key={d} className="text-center text-xs font-medium text-slate-500">
+            <div key={d} className="text-center text-xs font-medium text-slate-400">
               {d[0]}
             </div>
           ))}
@@ -122,13 +122,13 @@ export default function ActivityCalendar({ activityData }: ActivityCalendarProps
                 key={idx}
                 title={isSolved ? `Solved on ${dateStr}` : dateStr}
                 className={`
-                  h-9 rounded-lg flex items-center justify-center text-sm font-medium transition-colors
+                  h-9 rounded-xl flex items-center justify-center text-sm font-medium transition-all
                   ${isFuture ? 'opacity-20 cursor-default' : ''}
                   ${isSolved
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                    ? 'bg-violet-200/50 text-violet-700 border border-violet-300/50 shadow-sm'
                     : isToday
-                    ? 'bg-slate-700/60 text-white border border-blue-500/50'
-                    : 'text-slate-500 hover:bg-slate-800/50'
+                    ? 'bg-violet-100/30 text-slate-800 border border-violet-300 ring-1 ring-violet-200/50'
+                    : 'text-slate-500 hover:bg-violet-50/30'
                   }
                 `}
               >
@@ -139,24 +139,24 @@ export default function ActivityCalendar({ activityData }: ActivityCalendarProps
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 shrink-0 pt-1">
-        <div className="bg-slate-800/60 rounded-xl px-5 py-4 text-center min-w-[110px]">
-          <div className="text-2xl font-bold text-emerald-400 flex items-center justify-center gap-1">
+      <div className="flex flex-col gap-4 shrink-0 pt-1 stagger-children">
+        <div className="bg-gradient-to-br from-violet-100/50 to-fuchsia-100/30 border border-violet-200/30 rounded-2xl px-5 py-4 text-center min-w-[110px]">
+          <div className="text-2xl font-bold text-violet-600 flex items-center justify-center gap-1">
             {currentStreak}
             {currentStreak > 0 && <span className="text-xl">🔥</span>}
           </div>
-          <div className="text-xs text-slate-400 mt-1">Current Streak</div>
-          <div className="text-[10px] text-slate-600">days</div>
+          <div className="text-xs text-slate-500 mt-1">Current Streak</div>
+          <div className="text-[10px] text-slate-400">days</div>
         </div>
-        <div className="bg-slate-800/60 rounded-xl px-5 py-4 text-center min-w-[110px]">
-          <div className="text-2xl font-bold text-blue-400">{longestStreak}</div>
-          <div className="text-xs text-slate-400 mt-1">Longest Streak</div>
-          <div className="text-[10px] text-slate-600">days</div>
+        <div className="bg-gradient-to-br from-cyan-100/30 to-blue-100/20 border border-cyan-200/30 rounded-2xl px-5 py-4 text-center min-w-[110px]">
+          <div className="text-2xl font-bold text-cyan-600">{longestStreak}</div>
+          <div className="text-xs text-slate-500 mt-1">Longest Streak</div>
+          <div className="text-[10px] text-slate-400">days</div>
         </div>
-        <div className="bg-slate-800/60 rounded-xl px-5 py-4 text-center min-w-[110px]">
-          <div className="text-2xl font-bold text-white">{totalActiveDays}</div>
-          <div className="text-xs text-slate-400 mt-1">Active Days</div>
-          <div className="text-[10px] text-slate-600">total</div>
+        <div className="bg-gradient-to-br from-slate-100/40 to-violet-50/30 border border-violet-200/20 rounded-2xl px-5 py-4 text-center min-w-[110px]">
+          <div className="text-2xl font-bold text-slate-700">{totalActiveDays}</div>
+          <div className="text-xs text-slate-500 mt-1">Active Days</div>
+          <div className="text-[10px] text-slate-400">total</div>
         </div>
       </div>
     </div>

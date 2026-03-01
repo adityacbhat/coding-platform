@@ -11,8 +11,6 @@ export type PlaycardData = {
   createdAt: string;
 };
 
-// ─── Content parsers ─────────────────────────────────────────────────────────
-
 function parseFront(text: string) {
   const lines = text.split('\n').map((l) => l.trim());
   let title = '';
@@ -56,8 +54,6 @@ function parseBack(text: string) {
   return { type, ioLines, steps, link, raw: !type && !steps.length && !link };
 }
 
-// ─── Editor (create & edit) ──────────────────────────────────────────────────
-
 type PlaycardEditorProps = {
   section: string;
   initialFront?: string;
@@ -81,13 +77,12 @@ export function PlaycardEditor({
 
   return (
     <div className="flex flex-col items-center gap-5">
-      <div className="flex items-center gap-3 text-xs text-slate-500">
+      <div className="flex items-center gap-3 text-xs text-slate-400">
         <span>{flipped ? 'Side B — back' : 'Side A — front'}</span>
         <span>·</span>
         <span>Click card to flip</span>
       </div>
 
-      {/* Same size as deck view for WYSIWYG editing */}
       <div
         className="relative cursor-pointer"
         style={{ width: 560, height: 360, perspective: 1200 }}
@@ -97,7 +92,6 @@ export function PlaycardEditor({
           className="relative w-full h-full transition-transform duration-500"
           style={{ transformStyle: 'preserve-3d', transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
         >
-          {/* Front face */}
           <div
             className="absolute inset-0 rounded-2xl border border-blue-500/30 flex flex-col p-8 shadow-2xl overflow-hidden"
             style={{ backfaceVisibility: 'hidden', background: 'linear-gradient(145deg, rgba(59,130,246,0.09) 0%, #0f172a 35%)' }}
@@ -121,7 +115,6 @@ export function PlaycardEditor({
             />
           </div>
 
-          {/* Back face */}
           <div
             className="absolute inset-0 rounded-2xl border border-emerald-500/30 flex flex-col p-8 shadow-2xl overflow-hidden"
             style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', background: 'linear-gradient(145deg, rgba(16,185,129,0.09) 0%, #0f172a 35%)' }}
@@ -148,14 +141,14 @@ export function PlaycardEditor({
 
       <div className="flex gap-3">
         <button
-          className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-all hover:shadow-lg hover:shadow-indigo-500/25 disabled:opacity-40 disabled:cursor-not-allowed"
           onClick={() => { if (front.trim() && back.trim()) onSave(front.trim(), back.trim()); }}
           disabled={!front.trim() || !back.trim()}
         >
           {saveLabel}
         </button>
         <button
-          className="px-6 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium transition-colors"
+          className="px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium transition-colors"
           onClick={onCancel}
         >
           Cancel
@@ -164,8 +157,6 @@ export function PlaycardEditor({
     </div>
   );
 }
-
-// ─── Deck face content renderers ─────────────────────────────────────────────
 
 function DeckFrontContent({ text }: { text: string }) {
   const { title, description, ioLines, raw } = parseFront(text);
@@ -251,7 +242,7 @@ function DeckBackContent({ text }: { text: string }) {
 
       {steps.length > 0 && (
         <div className="flex-1 min-h-0 overflow-hidden">
-          <p className="text-slate-500 text-[10px] font-semibold uppercase tracking-widest mb-1.5">Algorithm</p>
+          <p className="text-slate-400 text-[10px] font-semibold uppercase tracking-widest mb-1.5">Algorithm</p>
           <div className="space-y-1">
             {steps.map((step, i) => (
               <p key={i} className="text-slate-200 text-xs leading-snug">{step}</p>
@@ -279,8 +270,6 @@ function DeckBackContent({ text }: { text: string }) {
     </div>
   );
 }
-
-// ─── Deck view ────────────────────────────────────────────────────────────────
 
 type PlaycardDeckViewProps = {
   cards: PlaycardData[];
@@ -319,8 +308,8 @@ export function PlaycardDeckView({ cards, onDelete, onEdit }: PlaycardDeckViewPr
   if (cards.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-3">
-        <p className="text-slate-500 text-sm">No cards here yet.</p>
-        <p className="text-slate-600 text-xs">Click "+ Add Playcard" above to create one.</p>
+        <p className="text-slate-400 text-sm">No cards here yet.</p>
+        <p className="text-slate-300 text-xs">Click &quot;+ Add Playcard&quot; above to create one.</p>
       </div>
     );
   }
@@ -331,18 +320,16 @@ export function PlaycardDeckView({ cards, onDelete, onEdit }: PlaycardDeckViewPr
   return (
     <div className="flex flex-col items-center gap-8 py-4 select-none">
       <div className="group relative" style={{ width: 560, height: 360 }}>
-        {/* Stack shadows */}
         <div className="absolute inset-0 rounded-2xl bg-slate-800 border border-slate-700/40"
              style={{ transform: 'translate(10px, 10px) rotate(2.5deg)' }} />
         <div className="absolute inset-0 rounded-2xl bg-slate-800 border border-slate-700/50"
              style={{ transform: 'translate(5px, 5px) rotate(1.2deg)' }} />
 
-        {/* Action icons */}
         <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
           {confirmDelete ? (
             <>
               <button
-                className="w-8 h-8 rounded-lg bg-red-500/90 hover:bg-red-500 text-white flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-lg bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-colors"
                 title="Confirm delete"
                 onClick={(e) => { e.stopPropagation(); onDelete(card.id); setConfirmDelete(false); }}
               >
@@ -388,19 +375,16 @@ export function PlaycardDeckView({ cards, onDelete, onEdit }: PlaycardDeckViewPr
           )}
         </div>
 
-        {/* Main flipping card */}
         <div className="absolute inset-0 cursor-pointer" style={{ perspective: 1200 }}
              onClick={() => setFlipped((f) => !f)}>
           <div className="w-full h-full transition-transform duration-500 relative"
                style={{ transformStyle: 'preserve-3d', transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}>
-            {/* Front */}
             <div className="absolute inset-0 rounded-2xl border border-slate-700/60 flex flex-col p-7 shadow-2xl overflow-hidden"
                  style={{ backfaceVisibility: 'hidden', background: 'linear-gradient(145deg, rgba(59,130,246,0.09) 0%, #0f172a 35%)' }}>
               <div className="absolute top-0 left-8 right-8 h-px bg-blue-500/30" />
               <div className="absolute top-4 right-4 w-2.5 h-2.5 rounded-full bg-blue-500/40" />
               <DeckFrontContent text={card.front} />
             </div>
-            {/* Back */}
             <div className="absolute inset-0 rounded-2xl border border-slate-700/60 flex flex-col p-6 shadow-2xl overflow-hidden"
                  style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', background: 'linear-gradient(145deg, rgba(16,185,129,0.09) 0%, #0f172a 35%)' }}>
               <div className="absolute top-0 left-8 right-8 h-px bg-emerald-500/30" />
@@ -411,21 +395,20 @@ export function PlaycardDeckView({ cards, onDelete, onEdit }: PlaycardDeckViewPr
         </div>
       </div>
 
-      {/* Navigation */}
       <div className="flex items-center gap-5">
         <button
-          className="w-11 h-11 rounded-full flex items-center justify-center bg-slate-800 border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white transition-all disabled:opacity-25 disabled:cursor-not-allowed"
+          className="w-11 h-11 rounded-full flex items-center justify-center soft-card hover:border-violet-300/40 text-slate-400 hover:text-violet-500 transition-all disabled:opacity-25 disabled:cursor-not-allowed"
           onClick={() => goTo(-1)} disabled={safeIndex === 0} title="Previous (←)"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
-        <span className="tabular-nums text-slate-400 text-sm font-medium w-16 text-center">
+        <span className="tabular-nums text-slate-500 text-sm font-medium w-16 text-center">
           {safeIndex + 1} / {cards.length}
         </span>
         <button
-          className="w-11 h-11 rounded-full flex items-center justify-center bg-slate-800 border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white transition-all disabled:opacity-25 disabled:cursor-not-allowed"
+          className="w-11 h-11 rounded-full flex items-center justify-center soft-card hover:border-violet-300/40 text-slate-400 hover:text-violet-500 transition-all disabled:opacity-25 disabled:cursor-not-allowed"
           onClick={() => goTo(1)} disabled={safeIndex === cards.length - 1} title="Next (→)"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -434,12 +417,11 @@ export function PlaycardDeckView({ cards, onDelete, onEdit }: PlaycardDeckViewPr
         </button>
       </div>
 
-      {/* Keyboard hint */}
-      <p className="text-xs text-slate-600">
-        <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono">←</kbd>
-        {' '}<kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono">→</kbd>
+      <p className="text-xs text-slate-400">
+        <kbd className="px-1.5 py-0.5 rounded bg-violet-100/30 border border-violet-200/30 font-mono text-slate-500">←</kbd>
+        {' '}<kbd className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono text-slate-500">→</kbd>
         {' '}to navigate ·{' '}
-        <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono">Enter</kbd>
+        <kbd className="px-1.5 py-0.5 rounded bg-violet-100/30 border border-violet-200/30 font-mono text-slate-500">Enter</kbd>
         {' '}to flip
       </p>
     </div>

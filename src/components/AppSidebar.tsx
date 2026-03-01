@@ -74,39 +74,39 @@ export default function AppSidebar({ email }: AppSidebarProps) {
   };
 
   return (
-    <aside className="w-64 min-h-screen bg-slate-900 border-r border-slate-800 flex flex-col shrink-0">
-      <div className="p-6 border-b border-slate-800">
+    <aside className="w-64 min-h-screen soft-card-solid border-r border-violet-100/50 flex flex-col shrink-0">
+      <div className="p-6 border-b border-violet-100/40">
         <Link
           href="/dashboard"
-          className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-emerald-400 text-transparent bg-clip-text"
+          className="text-xl font-bold tracking-tight gradient-text"
         >
           CodePrep
         </Link>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-3 space-y-1">
         {navItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
               isActive(item.href)
-                ? 'bg-blue-600/20 text-blue-400 border border-blue-600/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                ? 'bg-violet-100/60 text-violet-700 shadow-sm border border-violet-200/50'
+                : 'text-slate-500 hover:text-violet-600 hover:bg-violet-50/40'
             }`}
           >
-            {item.icon}
+            <span className={isActive(item.href) ? 'text-violet-500' : ''}>{item.icon}</span>
             {item.label}
           </Link>
         ))}
       </nav>
 
-      <div className="p-4 border-t border-slate-800">
+      <div className="p-4 border-t border-violet-100/40">
         <div className="flex items-center gap-3 px-3 py-2 mb-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm">
             {email.charAt(0).toUpperCase()}
           </div>
-          <span className="text-xs text-slate-400 truncate flex-1">{email}</span>
+          <span className="text-xs text-slate-500 truncate flex-1">{email}</span>
         </div>
         <div className="px-3">
           <SignOutButton />

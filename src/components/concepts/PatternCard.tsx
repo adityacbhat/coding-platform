@@ -12,17 +12,17 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   const difficultyColors = {
-    Easy: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/30',
-    Medium: 'text-amber-400 bg-amber-400/10 border-amber-400/30',
-    Hard: 'text-rose-400 bg-rose-400/10 border-rose-400/30',
+    Easy: 'text-emerald-600 bg-emerald-50 border-emerald-200',
+    Medium: 'text-amber-600 bg-amber-50 border-amber-200',
+    Hard: 'text-rose-600 bg-rose-50 border-rose-200',
   };
 
   return (
     <div
       className={`
-        bg-slate-900 border border-slate-800 rounded-xl overflow-hidden
+        bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm
         transition-all duration-300 ease-out
-        ${expanded ? 'ring-1 ring-blue-500/30' : ''}
+        ${expanded ? 'ring-1 ring-indigo-300' : ''}
       `}
       style={{
         animationDelay: `${index * 0.1}s`,
@@ -30,14 +30,14 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
     >
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full p-5 text-left flex items-center justify-between hover:bg-slate-800/50 transition-colors"
+        className="w-full p-5 text-left flex items-center justify-between hover:bg-slate-50 transition-colors"
       >
         <div className="flex items-center gap-4">
-          <span className="text-slate-500 font-mono text-sm w-6">{index + 1}.</span>
+          <span className="text-slate-400 font-mono text-sm w-6">{index + 1}.</span>
           <div>
-            <h4 className="text-lg font-semibold text-white">{problem.title}</h4>
+            <h4 className="text-lg font-semibold text-slate-800">{problem.title}</h4>
             <span
-              className={`text-xs px-2 py-0.5 rounded border mt-1 inline-block ${difficultyColors[problem.difficulty]}`}
+              className={`text-xs px-2 py-0.5 rounded-lg border mt-1 inline-block font-medium ${difficultyColors[problem.difficulty]}`}
             >
               {problem.difficulty}
             </span>
@@ -61,17 +61,17 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
           ${expanded ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0'}
         `}
       >
-        <div className="px-5 pb-5 space-y-5 border-t border-slate-800/50 pt-5">
+        <div className="px-5 pb-5 space-y-5 border-t border-slate-100 pt-5">
           <div>
             <h5 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">
               Explanation
             </h5>
-            <p className="text-slate-300 leading-relaxed">{problem.explanation}</p>
+            <p className="text-slate-600 leading-relaxed">{problem.explanation}</p>
           </div>
 
           {problem.examples && problem.examples.length > 0 && (
             <div>
-              <h5 className="text-sm font-semibold text-purple-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <h5 className="text-sm font-semibold text-purple-500 uppercase tracking-wider mb-3 flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
@@ -79,7 +79,7 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
               </h5>
               <div className="space-y-3">
                 {problem.examples.map((example, i) => (
-                  <div key={i} className="bg-slate-950 rounded-lg p-4 border border-slate-800">
+                  <div key={i} className="bg-slate-900 rounded-xl p-4 border border-slate-800">
                     <div className="space-y-2">
                       <div className="flex items-start gap-2">
                         <span className="text-purple-400 text-xs font-semibold uppercase w-14 flex-shrink-0 pt-0.5">Input:</span>
@@ -102,16 +102,16 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
 
           {problem.codeLines && problem.codeLines.length > 0 && (
             <div>
-              <h5 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <h5 className="text-sm font-semibold text-cyan-600 uppercase tracking-wider mb-3 flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                 </svg>
                 Code Walkthrough
               </h5>
-              <div className="bg-slate-950 rounded-lg border border-slate-800 overflow-hidden">
+              <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
                 <div className="divide-y divide-slate-800/50">
                   {problem.codeLines.map((line, i) => (
-                    <div key={i} className="flex hover:bg-slate-900/50 transition-colors">
+                    <div key={i} className="flex hover:bg-slate-800/50 transition-colors">
                       <div className="w-10 flex-shrink-0 text-slate-600 text-xs font-mono py-2 px-2 text-right bg-slate-900/50 border-r border-slate-800/50">
                         {i + 1}
                       </div>
@@ -131,7 +131,7 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
           )}
 
           <div>
-            <h5 className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <h5 className="text-sm font-semibold text-indigo-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -142,7 +142,7 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
               {problem.recognitionCues.map((cue, i) => (
                 <span
                   key={i}
-                  className="text-sm bg-blue-900/30 text-blue-300 px-3 py-1 rounded-full border border-blue-800/50"
+                  className="text-sm bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full border border-indigo-200 font-medium"
                 >
                   {cue}
                 </span>
@@ -150,7 +150,7 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
             </div>
           </div>
 
-          <div className="bg-slate-950 rounded-lg p-4 border border-slate-800">
+          <div className="bg-slate-900 rounded-xl p-4 border border-slate-800">
             <h5 className="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -161,7 +161,7 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
           </div>
 
           <div>
-            <h5 className="text-sm font-semibold text-amber-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <h5 className="text-sm font-semibold text-amber-600 uppercase tracking-wider mb-3 flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
@@ -169,7 +169,7 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
             </h5>
             <ul className="space-y-2">
               {problem.mentalChecklist.map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-slate-300">
+                <li key={i} className="flex items-start gap-3 text-slate-600">
                   <span className="text-amber-500 mt-1">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

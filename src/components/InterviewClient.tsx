@@ -69,9 +69,6 @@ export default function InterviewClient({ companies }: Props) {
   };
 
   const updateDistribution = (key: 'easyPercent' | 'mediumPercent' | 'hardPercent', value: number) => {
-    const total = config.easyPercent + config.mediumPercent + config.hardPercent;
-    const diff = value - config[key];
-    
     setConfig((prev) => ({
       ...prev,
       [key]: value,
@@ -80,46 +77,46 @@ export default function InterviewClient({ companies }: Props) {
 
   if (sessionStarted && problems) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between bg-slate-900 border border-slate-800 p-4 rounded-xl sticky top-4 z-10">
-          <div className="text-lg font-semibold text-white">
+      <div className="space-y-6 animate-fade-in-up">
+        <div className="flex items-center justify-between soft-card p-4 rounded-2xl sticky top-4 z-10 shadow-md">
+          <div className="text-lg font-semibold text-slate-800">
             Interview Session
           </div>
           <div className={`text-2xl font-mono font-bold ${
-            timeRemaining < 300 ? 'text-rose-400' : 'text-emerald-400'
+            timeRemaining < 300 ? 'text-rose-500' : 'text-emerald-600'
           }`}>
             {formatTime(timeRemaining)}
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 stagger-children">
           {problems.map((problem, idx) => (
             <Link
               key={problem.id}
               href={`/problems/${problem.slug}`}
               target="_blank"
-              className="block bg-slate-900 border border-slate-800 p-4 rounded-xl hover:border-blue-500/50 transition-colors"
+              className="block soft-card p-4 rounded-2xl hover:border-indigo-300 hover:shadow-md transition-all card-hover"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center text-sm font-medium text-slate-300">
+                  <div className="w-8 h-8 bg-indigo-50 rounded-xl flex items-center justify-center text-sm font-medium text-indigo-600">
                     {idx + 1}
                   </div>
                   <div>
-                    <div className="font-medium text-white">{problem.title}</div>
+                    <div className="font-medium text-slate-800">{problem.title}</div>
                     <div className="flex gap-2 mt-1">
                       {problem.concepts.slice(0, 2).map((c) => (
-                        <span key={c.slug} className="text-xs bg-slate-800 px-2 py-0.5 rounded text-slate-400">
+                        <span key={c.slug} className="text-xs bg-slate-100 px-2 py-0.5 rounded-lg text-slate-500">
                           {c.title}
                         </span>
                       ))}
                     </div>
                   </div>
                 </div>
-                <span className={`px-3 py-1 rounded text-xs font-medium ${
-                  problem.difficulty === 'Easy' ? 'bg-emerald-400/10 text-emerald-400' :
-                  problem.difficulty === 'Medium' ? 'bg-amber-400/10 text-amber-400' :
-                  'bg-rose-400/10 text-rose-400'
+                <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${
+                  problem.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+                  problem.difficulty === 'Medium' ? 'bg-amber-50 text-amber-600 border border-amber-200' :
+                  'bg-rose-50 text-rose-600 border border-rose-200'
                 }`}>
                   {problem.difficulty}
                 </span>
@@ -133,7 +130,7 @@ export default function InterviewClient({ companies }: Props) {
             setSessionStarted(false);
             setProblems(null);
           }}
-          className="w-full bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-lg font-medium transition-colors"
+          className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-xl font-medium transition-colors"
         >
           End Session
         </button>
@@ -143,20 +140,20 @@ export default function InterviewClient({ companies }: Props) {
 
   if (problems) {
     return (
-      <div className="space-y-6">
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl">
-          <h2 className="text-xl font-bold text-white mb-4">Generated Problems</h2>
+      <div className="space-y-6 animate-fade-in-up">
+        <div className="soft-card p-6 rounded-2xl shadow-sm">
+          <h2 className="text-xl font-bold text-slate-800 mb-4">Generated Problems</h2>
           <div className="space-y-3">
             {problems.map((problem, idx) => (
-              <div key={problem.id} className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+              <div key={problem.id} className="flex items-center justify-between p-3 bg-violet-50/30 rounded-xl">
                 <div className="flex items-center gap-3">
                   <span className="text-slate-400 text-sm">{idx + 1}.</span>
-                  <span className="text-white">{problem.title}</span>
+                  <span className="text-slate-800 font-medium">{problem.title}</span>
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded ${
-                  problem.difficulty === 'Easy' ? 'bg-emerald-400/10 text-emerald-400' :
-                  problem.difficulty === 'Medium' ? 'bg-amber-400/10 text-amber-400' :
-                  'bg-rose-400/10 text-rose-400'
+                <span className={`text-xs px-2.5 py-1 rounded-lg font-semibold ${
+                  problem.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-600' :
+                  problem.difficulty === 'Medium' ? 'bg-amber-50 text-amber-600' :
+                  'bg-rose-50 text-rose-600'
                 }`}>
                   {problem.difficulty}
                 </span>
@@ -168,13 +165,13 @@ export default function InterviewClient({ companies }: Props) {
         <div className="flex gap-4">
           <button
             onClick={startSession}
-            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-medium transition-colors"
+            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-medium transition-all hover:shadow-lg hover:shadow-emerald-500/25"
           >
             Start Session ({config.timeLimit} min)
           </button>
           <button
             onClick={generateProblems}
-            className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-lg font-medium transition-colors"
+            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-xl font-medium transition-colors"
           >
             Regenerate
           </button>
@@ -182,7 +179,7 @@ export default function InterviewClient({ companies }: Props) {
 
         <button
           onClick={() => setProblems(null)}
-          className="w-full text-slate-400 hover:text-slate-200 py-2"
+          className="w-full text-slate-400 hover:text-indigo-600 py-2 transition-colors"
         >
           Change Settings
         </button>
@@ -192,13 +189,13 @@ export default function InterviewClient({ companies }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-6">
+      <div className="soft-card p-6 rounded-2xl space-y-6 shadow-sm">
         <div>
-          <label className="block text-sm font-medium text-white mb-2">Target Company (Optional)</label>
+          <label className="block text-sm font-medium text-slate-700 mb-2">Target Company (Optional)</label>
           <select
             value={config.company}
             onChange={(e) => setConfig((prev) => ({ ...prev, company: e.target.value }))}
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-slate-200 focus:outline-none focus:border-blue-500"
+            className="w-full bg-white/40 border border-violet-200/30 rounded-xl px-4 py-2.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition"
           >
             <option value="">Any Company</option>
             {companies.map((company) => (
@@ -208,8 +205,8 @@ export default function InterviewClient({ companies }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white mb-2">
-            Number of Problems: {config.problemCount}
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Number of Problems: <span className="text-indigo-600 font-bold">{config.problemCount}</span>
           </label>
           <input
             type="range"
@@ -217,17 +214,17 @@ export default function InterviewClient({ companies }: Props) {
             max="10"
             value={config.problemCount}
             onChange={(e) => setConfig((prev) => ({ ...prev, problemCount: parseInt(e.target.value) }))}
-            className="w-full accent-blue-500"
+            className="w-full"
           />
-          <div className="flex justify-between text-xs text-slate-500 mt-1">
+          <div className="flex justify-between text-xs text-slate-400 mt-1">
             <span>3</span>
             <span>10</span>
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white mb-2">
-            Time Limit: {config.timeLimit} minutes
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Time Limit: <span className="text-indigo-600 font-bold">{config.timeLimit} minutes</span>
           </label>
           <input
             type="range"
@@ -236,20 +233,20 @@ export default function InterviewClient({ companies }: Props) {
             step="15"
             value={config.timeLimit}
             onChange={(e) => setConfig((prev) => ({ ...prev, timeLimit: parseInt(e.target.value) }))}
-            className="w-full accent-blue-500"
+            className="w-full"
           />
-          <div className="flex justify-between text-xs text-slate-500 mt-1">
+          <div className="flex justify-between text-xs text-slate-400 mt-1">
             <span>30 min</span>
             <span>120 min</span>
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white mb-4">Difficulty Distribution</label>
+          <label className="block text-sm font-medium text-slate-700 mb-4">Difficulty Distribution</label>
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-slate-800 p-4 rounded-lg text-center">
-              <div className="text-emerald-400 text-2xl font-bold">{config.easyPercent}%</div>
-              <div className="text-sm text-slate-400">Easy</div>
+            <div className="bg-emerald-100/30 border border-emerald-200/30 p-4 rounded-xl text-center">
+              <div className="text-emerald-600 text-2xl font-bold">{config.easyPercent}%</div>
+              <div className="text-sm text-slate-500">Easy</div>
               <input
                 type="range"
                 min="0"
@@ -257,12 +254,12 @@ export default function InterviewClient({ companies }: Props) {
                 step="10"
                 value={config.easyPercent}
                 onChange={(e) => updateDistribution('easyPercent', parseInt(e.target.value))}
-                className="w-full mt-2 accent-emerald-500"
+                className="w-full mt-2"
               />
             </div>
-            <div className="bg-slate-800 p-4 rounded-lg text-center">
-              <div className="text-amber-400 text-2xl font-bold">{config.mediumPercent}%</div>
-              <div className="text-sm text-slate-400">Medium</div>
+            <div className="bg-amber-100/30 border border-amber-200/30 p-4 rounded-xl text-center">
+              <div className="text-amber-600 text-2xl font-bold">{config.mediumPercent}%</div>
+              <div className="text-sm text-slate-500">Medium</div>
               <input
                 type="range"
                 min="0"
@@ -270,12 +267,12 @@ export default function InterviewClient({ companies }: Props) {
                 step="10"
                 value={config.mediumPercent}
                 onChange={(e) => updateDistribution('mediumPercent', parseInt(e.target.value))}
-                className="w-full mt-2 accent-amber-500"
+                className="w-full mt-2"
               />
             </div>
-            <div className="bg-slate-800 p-4 rounded-lg text-center">
-              <div className="text-rose-400 text-2xl font-bold">{config.hardPercent}%</div>
-              <div className="text-sm text-slate-400">Hard</div>
+            <div className="bg-rose-100/30 border border-rose-200/30 p-4 rounded-xl text-center">
+              <div className="text-rose-600 text-2xl font-bold">{config.hardPercent}%</div>
+              <div className="text-sm text-slate-500">Hard</div>
               <input
                 type="range"
                 min="0"
@@ -283,7 +280,7 @@ export default function InterviewClient({ companies }: Props) {
                 step="10"
                 value={config.hardPercent}
                 onChange={(e) => updateDistribution('hardPercent', parseInt(e.target.value))}
-                className="w-full mt-2 accent-rose-500"
+                className="w-full mt-2"
               />
             </div>
           </div>
@@ -293,7 +290,7 @@ export default function InterviewClient({ companies }: Props) {
       <button
         onClick={generateProblems}
         disabled={isGenerating}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white py-3 rounded-lg font-medium transition-colors"
+        className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white py-3 rounded-xl font-medium transition-all hover:shadow-lg hover:shadow-indigo-500/25"
       >
         {isGenerating ? 'Generating...' : 'Generate Problems'}
       </button>
