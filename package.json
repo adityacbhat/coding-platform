@@ -21,6 +21,7 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.98.0",
     "dotenv": "^17.3.1",
+    "jsonrepair": "^3.13.2",
     "mermaid": "^11.12.3",
     "next": "16.1.6",
     "pg": "^8.19.0",

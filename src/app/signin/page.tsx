@@ -31,7 +31,7 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[70vh]">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="w-full max-w-md">
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 space-y-6">
           <div className="text-center">

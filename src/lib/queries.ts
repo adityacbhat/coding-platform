@@ -262,6 +262,49 @@ export async function getProblemsByCompany(companySlug: string): Promise<Problem
   }));
 }
 
+export async function getUserDashboardStats(userId: string) {
+  const [solvedProgress, totalProblems] = await Promise.all([
+    prisma.userProgress.findMany({
+      where: { userId, status: 'solved' },
+      include: {
+        problem: { select: { difficulty: true } },
+      },
+    }),
+    prisma.problem.count(),
+  ]);
+
+  return {
+    solved: solvedProgress.length,
+    totalProblems,
+    solvedByDifficulty: {
+      Easy: solvedProgress.filter((p) => p.problem.difficulty === 'Easy').length,
+      Medium: solvedProgress.filter((p) => p.problem.difficulty === 'Medium').length,
+      Hard: solvedProgress.filter((p) => p.problem.difficulty === 'Hard').length,
+    },
+  };
+}
+
+export async function getUserActivity(userId: string) {
+  const progress = await prisma.userProgress.findMany({
+    where: {
+      userId,
+      status: 'solved',
+      solvedAt: { not: null },
+    },
+    select: { solvedAt: true },
+  });
+
+  const countByDate = new Map<string, number>();
+  for (const p of progress) {
+    if (p.solvedAt) {
+      const dateStr = p.solvedAt.toISOString().split('T')[0];
+      countByDate.set(dateStr, (countByDate.get(dateStr) ?? 0) + 1);
+    }
+  }
+
+  return Array.from(countByDate.entries()).map(([date, count]) => ({ date, count }));
+}
+
 export async function getStats() {
   const [problemCount, conceptCount, companyCount] = await Promise.all([
     prisma.problem.count(),

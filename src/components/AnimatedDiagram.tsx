@@ -416,7 +416,7 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
             </div>
 
             {/* Variables panel */}
-            <div className="w-72 flex-shrink-0 border-l border-slate-800 flex flex-col min-h-0">
+            <div className="w-96 flex-shrink-0 border-l border-slate-800 flex flex-col min-h-0">
               {/* Current event */}
               {cur && (
                 <div className={`flex-shrink-0 px-4 py-3 border-b border-slate-800 ${
@@ -442,8 +442,8 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
               {userCode && cur && cur.line > 0 && (() => {
                 const lines = userCode.split('\n');
                 const curLine = cur.line - 1; // 0-indexed
-                const start = Math.max(0, curLine - 2);
-                const end   = Math.min(lines.length - 1, curLine + 2);
+                const start = Math.max(0, curLine - 4);
+                const end   = Math.min(lines.length - 1, curLine + 4);
                 const snippet = lines.slice(start, end + 1);
                 return (
                   <div className="flex-shrink-0 border-b border-slate-800 bg-slate-950 px-4 py-3">
@@ -454,16 +454,16 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
                         const isActive = lineNum === cur.line;
                         const isError  = isActive && cur.highlight === 'error';
                         return (
-                          <div key={lineNum} className={`flex items-start gap-2 rounded px-1 py-0.5 ${
+                          <div key={lineNum} className={`flex items-start gap-2 rounded px-1.5 py-1 ${
                             isError  ? 'bg-amber-900/40' :
                             isActive ? 'bg-sky-900/40'   : ''
                           }`}>
-                            <span className={`text-[10px] font-mono select-none w-5 text-right flex-shrink-0 mt-0.5 ${
+                            <span className={`text-xs font-mono select-none w-6 text-right flex-shrink-0 mt-px ${
                               isActive ? (isError ? 'text-amber-400' : 'text-cyan-400') : 'text-slate-600'
                             }`}>
                               {lineNum}
                             </span>
-                            <span className={`font-mono text-xs break-all whitespace-pre-wrap ${
+                            <span className={`font-mono text-sm leading-snug break-all whitespace-pre-wrap ${
                               isError  ? 'text-amber-200' :
                               isActive ? 'text-cyan-200'  : 'text-slate-500'
                             }`}>

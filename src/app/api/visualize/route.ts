@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { jsonrepair } from 'jsonrepair';
 import { prisma } from '@/lib/db';
 
 const client = new Anthropic();
@@ -153,7 +154,7 @@ JSON schema:
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-5',
-    max_tokens: 3500,
+    max_tokens: 8000,
     messages: [{ role: 'user', content: prompt }],
   });
 
@@ -164,7 +165,7 @@ JSON schema:
   }
 
   const rawText = content.text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-  const visualization: VisualizationData = JSON.parse(rawText);
+  const visualization: VisualizationData = JSON.parse(jsonrepair(rawText));
 
   return NextResponse.json({ visualization });
 }

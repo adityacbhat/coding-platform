@@ -54,6 +54,7 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
   const [hintResult, setHintResult] = useState<HintData | null>(null);
   const [vizLoading, setVizLoading] = useState<number | null>(null);
   const [vizResults, setVizResults] = useState<Record<number, VisualizationData>>({});
+  const [vizErrors, setVizErrors] = useState<Record<number, string>>({});
   const [activeTab, setActiveTab] = useState<'description' | 'testcases' | 'results'>('description');
   const [testResults, setTestResults] = useState<ExecuteResult | null>(
     savedResults ? (savedResults as unknown as ExecuteResult) : null
@@ -206,6 +207,11 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
       delete next[testCaseId];
       return next;
     });
+    setVizErrors((prev) => {
+      const next = { ...prev };
+      delete next[testCaseId];
+      return next;
+    });
 
     const response = await fetch('/api/visualize', {
       method: 'POST',
@@ -213,7 +219,20 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
       body: JSON.stringify({ code, language, problemSlug: problem.slug, input, expectedOutput }),
     });
 
+    if (!response.ok) {
+      setVizErrors((prev) => ({ ...prev, [testCaseId]: 'Visualization failed. Please try again.' }));
+      setVizLoading(null);
+      return;
+    }
+
     const data = await response.json();
+
+    if (!data.visualization) {
+      setVizErrors((prev) => ({ ...prev, [testCaseId]: data.error ?? 'No visualization data returned.' }));
+      setVizLoading(null);
+      return;
+    }
+
     setVizResults((prev) => ({ ...prev, [testCaseId]: data.visualization }));
     setVizLoading(null);
   };
@@ -514,15 +533,22 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
 
                           {/* Visualize button */}
                           {vizLoading !== result.testCaseId && !vizResults[result.testCaseId] && (
-                            <button
-                              onClick={() => visualize(result.testCaseId, result.input, result.expected)}
-                              className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 px-3 py-1.5 rounded-lg transition-colors"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                              </svg>
-                              Visualize
-                            </button>
+                            <div className="space-y-1.5">
+                              <button
+                                onClick={() => visualize(result.testCaseId, result.input, result.expected)}
+                                className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                Visualize
+                              </button>
+                              {vizErrors[result.testCaseId] && (
+                                <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 rounded-lg">
+                                  {vizErrors[result.testCaseId]}
+                                </p>
+                              )}
+                            </div>
                           )}
 
                           {vizLoading === result.testCaseId && (

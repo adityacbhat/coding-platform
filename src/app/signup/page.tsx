@@ -59,7 +59,7 @@ export default function SignUpPage() {
 
   if (success) {
     return (
-      <div className="flex items-center justify-center min-h-[70vh]">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="w-full max-w-md">
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center space-y-4">
             <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto">
@@ -82,7 +82,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[70vh]">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="w-full max-w-md">
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 space-y-6">
           <div className="text-center">
