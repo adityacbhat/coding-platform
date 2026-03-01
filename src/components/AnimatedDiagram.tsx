@@ -48,12 +48,10 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
   const [svg, setSvg] = useState('');
   const [renderError, setRenderError] = useState('');
   const [frame, setFrame] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Saved original fill/stroke per SVG node element ID
   const origStyles = useRef<Record<string, { fill: string; stroke: string }>>({});
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ── Render Mermaid ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -168,24 +166,6 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
     applyHighlights(frame);
   }, [frame, svg, applyHighlights]);
 
-  // ── Auto-play ────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    if (!isPlaying || path.length <= 1) return;
-
-    intervalRef.current = setInterval(() => {
-      setFrame((f) => {
-        if (f >= path.length - 1) {
-          setIsPlaying(false);
-          return f;
-        }
-        return f + 1;
-      });
-    }, 1500);
-
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [isPlaying, path.length]);
-
   // Apply highlights + auto-scale SVG when modal opens or frame changes
   useEffect(() => {
     if (!isExpanded || !svg) return;
@@ -216,8 +196,8 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
   }, []);
 
   // ── Controls ─────────────────────────────────────────────────────────────────
-  const prev = () => { setIsPlaying(false); setFrame((f) => Math.max(0, f - 1)); };
-  const next = () => { setIsPlaying(false); setFrame((f) => Math.min(path.length - 1, f + 1)); };
+  const prev = () => setFrame((f) => Math.max(0, f - 1));
+  const next = () => setFrame((f) => Math.min(path.length - 1, f + 1));
 
   const cur = path[frame];
   const prevFrame = frame > 0 ? path[frame - 1] : null;
@@ -246,15 +226,14 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
   const Controls = (
     <div className="flex items-center justify-center gap-2">
       <button onClick={prev} disabled={frame === 0}
-        className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-25 text-slate-200 text-lg transition-colors">
+        className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-25 text-slate-200 text-lg">
         ‹
       </button>
-      <button onClick={() => setIsPlaying(!isPlaying)}
-        className="flex items-center gap-1.5 px-4 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors min-w-[80px] justify-center">
-        {isPlaying ? <><span className="text-sm">⏸</span> Pause</> : <><span className="text-sm">▶</span> Play</>}
-      </button>
+      <span className="text-xs text-slate-500 tabular-nums min-w-[60px] text-center">
+        {frame + 1} / {path.length}
+      </span>
       <button onClick={next} disabled={frame === path.length - 1}
-        className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-25 text-slate-200 text-lg transition-colors">
+        className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-25 text-slate-200 text-lg">
         ›
       </button>
     </div>
@@ -294,7 +273,7 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
           {path.map((f, i) => (
             <button
               key={i}
-              onClick={() => { setIsPlaying(false); setFrame(i); }}
+              onClick={() => setFrame(i)}
               title={f.event}
               className={`rounded-full ${
                 i === frame
@@ -485,7 +464,7 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
                   <div className="flex-shrink-0 border-t border-slate-800 px-4 py-3 bg-slate-900/30">
                     <div className="flex items-center justify-center gap-1 flex-wrap mb-3">
                       {path.map((f, i) => (
-                        <button key={i} onClick={() => { setIsPlaying(false); setFrame(i); }} title={f.event}
+                        <button key={i} onClick={() => setFrame(i)} title={f.event}
                           className={`rounded-full ${
                             i === frame
                               ? `w-3 h-3 ${f.highlight === 'error' ? 'bg-amber-400' : f.highlight === 'success' ? 'bg-emerald-400' : 'bg-cyan-400'}`
