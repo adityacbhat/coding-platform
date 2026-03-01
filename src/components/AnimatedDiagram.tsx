@@ -367,7 +367,7 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
             <span className="text-sm font-semibold text-slate-200 flex-shrink-0">Execution Flow</span>
 
             {/* Test input */}
-            {testInput && (
+            {!!testInput && (
               <div className="flex items-center gap-2 min-w-0">
                 <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider flex-shrink-0">Input</span>
                 <span className="font-mono text-xs text-slate-300 truncate">

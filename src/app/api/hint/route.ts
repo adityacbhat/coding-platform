@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
 Problem: ${problem.title} (${problem.difficulty})
 ${problem.description}
-${problem.constraints?.length ? `\nConstraints:\n${problem.constraints.join('\n')}` : ''}
+${Array.isArray(problem.constraints) && problem.constraints.length > 0 ? `\nConstraints:\n${(problem.constraints as string[]).join('\n')}` : ''}
 
 Student's solution (${language}):
 ${code}

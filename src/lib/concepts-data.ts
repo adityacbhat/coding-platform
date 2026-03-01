@@ -1147,6 +1147,24 @@ def isAnagram(s: str, t: str) -> bool:
   },
 ];
 
+export type PythonConcept = {
+  slug: string;
+  title: string;
+  description: string;
+  examples: { code: string; explanation: string }[];
+};
+
+export const PYTHON_CONCEPTS: PythonConcept[] = (
+  MODULES.find((m) => m.slug === 'general-concept')?.subConcepts ?? []
+)
+  .filter((sc) => sc.pythonExamples && sc.pythonExamples.length > 0)
+  .map((sc) => ({
+    slug: sc.slug,
+    title: sc.title,
+    description: sc.description,
+    examples: sc.pythonExamples!,
+  }));
+
 export function getModuleBySlug(slug: string): ModuleContent | undefined {
   return MODULES.find((m) => m.slug === slug);
 }
