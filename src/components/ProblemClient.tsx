@@ -292,15 +292,15 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
   }, [panelWidths]);
 
   return (
-    <div className="fixed left-0 right-0 bottom-0 px-4 pt-3 pb-2 flex flex-col overflow-hidden bg-[#eee9f5]" style={{ top: '61px' }}>
+    <div className="fixed left-0 right-0 bottom-0 px-4 pt-3 pb-2 flex flex-col overflow-hidden bg-slate-950" style={{ top: '61px' }}>
       <div className="mb-4">
-        <Link href="/problems" className="text-indigo-600 hover:text-indigo-700 text-sm mb-2 inline-block font-medium">&larr; Back to Problems</Link>
+        <Link href="/problems" className="text-indigo-400 hover:text-indigo-300 text-sm mb-2 inline-block font-medium">&larr; Back to Problems</Link>
         <div className="flex items-center gap-4 flex-wrap">
-          <h1 className="text-2xl font-bold text-slate-800">{problem.title}</h1>
+          <h1 className="text-2xl font-bold text-slate-100">{problem.title}</h1>
           <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${
-            problem.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
-            problem.difficulty === 'Medium' ? 'bg-amber-50 text-amber-600 border-amber-200' :
-            'bg-rose-50 text-rose-600 border-rose-200'
+            problem.difficulty === 'Easy' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+            problem.difficulty === 'Medium' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
+            'bg-rose-500/20 text-rose-400 border-rose-500/30'
           }`}>
             {problem.difficulty}
           </span>
@@ -310,7 +310,7 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
                 <Link 
                   key={concept.slug} 
                   href={`/concepts/${concept.slug}`}
-                  className="text-xs bg-indigo-50 px-2 py-1 rounded-lg text-indigo-600 hover:bg-indigo-100 transition-colors font-medium"
+                  className="text-xs bg-indigo-500/20 px-2 py-1 rounded-lg text-indigo-400 hover:bg-indigo-500/30 transition-colors font-medium"
                 >
                   {concept.title}
                 </Link>
@@ -322,13 +322,13 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
 
       <div ref={containerRef} className="flex flex-1 min-h-0 gap-0">
         <div style={{ width: `${panelWidths[0]}%` }} className="overflow-y-auto pr-2 space-y-4 min-w-0 flex-shrink-0">
-          <div className="flex gap-2 border-b border-violet-200/30">
+          <div className="flex gap-2 border-b border-slate-700">
             <button
               onClick={() => setActiveTab('description')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === 'description'
-                  ? 'text-indigo-600 border-b-2 border-indigo-600'
-                  : 'text-slate-400 hover:text-slate-600'
+                  ? 'text-indigo-400 border-b-2 border-indigo-400'
+                  : 'text-slate-500 hover:text-slate-300'
               }`}
             >
               Description
@@ -337,8 +337,8 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
               onClick={() => setActiveTab('testcases')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === 'testcases'
-                  ? 'text-indigo-600 border-b-2 border-indigo-600'
-                  : 'text-slate-400 hover:text-slate-600'
+                  ? 'text-indigo-400 border-b-2 border-indigo-400'
+                  : 'text-slate-500 hover:text-slate-300'
               }`}
             >
               Test Cases ({problem.testCases?.length ?? 0})
@@ -347,8 +347,8 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
               onClick={() => setActiveTab('results')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === 'results'
-                  ? 'text-indigo-600 border-b-2 border-indigo-600'
-                  : 'text-slate-400 hover:text-slate-600'
+                  ? 'text-indigo-400 border-b-2 border-indigo-400'
+                  : 'text-slate-500 hover:text-slate-300'
               }`}
             >
               Results
@@ -357,7 +357,7 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
               )}
               {!isRunning && !isSubmitting && testResults && (
                 <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-lg ${
-                  testResults.success ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                  testResults.success ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
                 }`}>
                   {testResults.passedTests}/{testResults.totalTests}
                 </span>
@@ -368,14 +368,14 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
           {activeTab === 'description' && (
             <div className="soft-card p-6 rounded-2xl">
               <div className="prose prose-sm max-w-none mb-6
-                prose-p:text-slate-600 prose-p:leading-relaxed prose-p:my-3
-                prose-strong:text-slate-800 prose-strong:font-semibold
-                prose-em:text-slate-700
-                prose-code:text-indigo-600 prose-code:bg-indigo-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-lg prose-code:text-sm prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
-                prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800 prose-pre:rounded-xl prose-pre:p-4
-                prose-ul:text-slate-600 prose-ul:my-2
-                prose-li:text-slate-600 prose-li:my-1
-                prose-headings:text-slate-800 prose-headings:font-semibold
+                prose-p:text-slate-300 prose-p:leading-relaxed prose-p:my-3
+                prose-strong:text-slate-100 prose-strong:font-semibold
+                prose-em:text-slate-200
+                prose-code:text-indigo-400 prose-code:bg-indigo-500/20 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-lg prose-code:text-sm prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
+                prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-700 prose-pre:rounded-xl prose-pre:p-4
+                prose-ul:text-slate-300 prose-ul:my-2
+                prose-li:text-slate-300 prose-li:my-1
+                prose-headings:text-slate-100 prose-headings:font-semibold
               ">
                 <ReactMarkdown
                   components={{
@@ -383,7 +383,7 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
                       const isInline = !className;
                       if (isInline) {
                         return (
-                          <code className="text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-lg text-sm font-mono" {...props}>
+                          <code className="text-indigo-400 bg-indigo-500/20 px-1.5 py-0.5 rounded-lg text-sm font-mono" {...props}>
                             {children}
                           </code>
                         );
@@ -407,19 +407,19 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
               
               {problem.testCases && problem.testCases.length > 0 && (
                 <>
-                  <h3 className="text-md font-semibold text-slate-800 mb-3">Examples</h3>
+                  <h3 className="text-md font-semibold text-slate-100 mb-3">Examples</h3>
                   <div className="space-y-4">
                     {problem.testCases.slice(0, 2).map((testCase, idx) => (
-                      <div key={testCase.id} className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                      <div key={testCase.id} className="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
                         <div className="text-xs text-slate-400 mb-2">Example {idx + 1}</div>
                         <div className="space-y-2 text-sm font-mono">
                           <div>
                             <span className="text-slate-400 select-none">Input: </span>
-                            <span className="text-slate-700">{formatTestInput(testCase.input)}</span>
+                            <span className="text-slate-200">{formatTestInput(testCase.input)}</span>
                           </div>
                           <div>
                             <span className="text-slate-400 select-none">Output: </span>
-                            <span className="text-slate-700">{JSON.stringify(testCase.expectedOutput)}</span>
+                            <span className="text-slate-200">{JSON.stringify(testCase.expectedOutput)}</span>
                           </div>
                         </div>
                       </div>
@@ -430,7 +430,7 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
 
               {problem.constraints && problem.constraints.length > 0 && (
                 <div className="mt-6">
-                  <h3 className="text-md font-semibold text-slate-800 mb-3">Constraints</h3>
+                  <h3 className="text-md font-semibold text-slate-100 mb-3">Constraints</h3>
                   <ul className="list-disc list-inside text-slate-500 text-sm space-y-1">
                     {problem.constraints.map((constraint, idx) => (
                       <li key={idx} className="font-mono">{constraint}</li>
@@ -445,7 +445,7 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
             <div className="space-y-4">
               {problem.testCases?.map((testCase, idx) => (
                 <div key={testCase.id} className="soft-card p-4 rounded-2xl">
-                  <div className="text-sm font-medium text-slate-800 mb-3">Test Case {idx + 1}</div>
+                  <div className="text-sm font-medium text-slate-100 mb-3">Test Case {idx + 1}</div>
                   <div className="space-y-3">
                     <div>
                       <div className="text-xs text-slate-400 mb-1">Input</div>
@@ -528,7 +528,7 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
                         <span className={`w-2 h-2 rounded-full ${
                           result.passed ? 'bg-emerald-500' : 'bg-rose-500'
                         }`} />
-                        <span className="text-sm font-medium text-slate-800">
+                        <span className="text-sm font-medium text-slate-100">
                           Test Case {idx + 1}
                         </span>
                         <span className={`text-xs font-medium ${
@@ -610,7 +610,7 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
                                 </span>
                                 <button
                                   onClick={() => setVizResults((prev) => { const next = { ...prev }; delete next[result.testCaseId]; return next; })}
-                                  className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                                  className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
                                 >
                                   Dismiss
                                 </button>
@@ -743,13 +743,13 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
               <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-              <span className="text-sm font-medium text-slate-800">Analysis</span>
+              <span className="text-sm font-medium text-slate-100">Analysis</span>
             </div>
             {analysisResult && !isAnalyzing && (
               <button
                 onClick={analyzeCode}
                 disabled={isAnalyzing}
-                className="text-xs bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-600 px-3 py-1 rounded-lg font-medium transition-colors"
+                className="text-xs bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-slate-300 px-3 py-1 rounded-lg font-medium transition-colors"
               >
                 Re-analyse
               </button>
@@ -780,7 +780,7 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
                   </svg>
                 </div>
                 <div>
-                  <p className="text-slate-800 font-medium mb-1 text-base">Analyse My Solution</p>
+                  <p className="text-slate-100 font-medium mb-1 text-base">Analyse My Solution</p>
                   <p className="text-slate-500 text-sm">Get AI feedback on time &amp; space complexity, optimality, and code quality.</p>
                 </div>
                 <button
@@ -790,87 +790,10 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
                   Analyse
                 </button>
               </div>
-              <button
-                onClick={getHint}
-                disabled={isHinting}
-                className="w-full flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 disabled:opacity-50 border border-amber-200 text-amber-600 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {isHinting ? 'Thinking…' : 'What am I doing wrong?'}
-              </button>
-            </div>
-          )}
-
-          {!isAnalyzing && analysisResult && (
-            <div className="space-y-4">
-              <div className={`p-4 rounded-2xl border flex items-start gap-3 ${
-                analysisResult.analysis.isOptimal
-                  ? 'bg-emerald-50 border-emerald-200'
-                  : 'bg-amber-50 border-amber-200'
-              }`}>
-                <div className={`mt-0.5 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
-                  analysisResult.analysis.isOptimal ? 'bg-emerald-100' : 'bg-amber-100'
-                }`}>
-                  {analysisResult.analysis.isOptimal ? (
-                    <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z" />
-                    </svg>
-                  )}
-                </div>
-                <div>
-                  <p className={`text-base font-semibold mb-0.5 ${
-                    analysisResult.analysis.isOptimal ? 'text-emerald-700' : 'text-amber-700'
-                  }`}>
-                    {analysisResult.analysis.isOptimal ? 'Optimal Solution' : 'Not Optimal'}
-                  </p>
-                  <p className="text-slate-600 text-sm leading-relaxed">{analysisResult.analysis.optimalityExplanation}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="soft-card p-3 rounded-2xl space-y-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                    <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Time</span>
-                  </div>
-                  <p className="text-2xl font-bold font-mono text-slate-800">{analysisResult.analysis.timeComplexity}</p>
-                  <p className="text-sm text-slate-500 leading-relaxed">{analysisResult.analysis.timeComplexityReason}</p>
-                </div>
-                <div className="soft-card p-3 rounded-2xl space-y-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-violet-500" />
-                    <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Space</span>
-                  </div>
-                  <p className="text-2xl font-bold font-mono text-slate-800">{analysisResult.analysis.spaceComplexity}</p>
-                  <p className="text-sm text-slate-500 leading-relaxed">{analysisResult.analysis.spaceComplexityReason}</p>
-                </div>
-              </div>
-
-              <div className="soft-card p-4 rounded-2xl space-y-2">
-                <div className="flex items-center gap-2 mb-1">
-                  <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                  </svg>
-                  <span className="text-base font-medium text-slate-800">Feedback</span>
-                </div>
-                <p className="text-slate-600 text-sm leading-relaxed">{analysisResult.analysis.feedback}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Hint section — always shown below analysis results */}
-          {!isAnalyzing && analysisResult && (
-            <div className="border-t border-slate-200 pt-4 space-y-3">
               {!isHinting && !hintResult && (
                 <button
                   onClick={getHint}
-                  className="w-full flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-600 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                  className="w-full flex items-center justify-center gap-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-400 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -901,26 +824,152 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
                       <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <span className="text-sm font-medium text-slate-800">Hints</span>
+                      <span className="text-sm font-medium text-slate-100">Hints</span>
                     </div>
                     <button
                       onClick={getHint}
-                      className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1 rounded-lg font-medium transition-colors"
+                      className="text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1 rounded-lg font-medium transition-colors"
                     >
                       Try again
                     </button>
                   </div>
-                  <div className="bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl">
-                    <span className="text-xs font-medium text-amber-600 uppercase tracking-wider">Area to focus on</span>
-                    <p className="text-amber-800 text-sm font-medium mt-0.5">{hintResult.area}</p>
+                  <div className="bg-amber-500/20 border border-amber-500/30 px-4 py-2 rounded-xl">
+                    <span className="text-xs font-medium text-amber-400 uppercase tracking-wider">Area to focus on</span>
+                    <p className="text-amber-300 text-sm font-medium mt-0.5">{hintResult.area}</p>
                   </div>
                   <div className="space-y-2">
                     {hintResult.hints.map((hint, i) => (
                       <div key={i} className="flex gap-3 soft-card p-3 rounded-xl">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-100 border border-amber-200 text-amber-600 text-xs font-bold flex items-center justify-center mt-0.5">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-500/30 border border-amber-500/50 text-amber-400 text-xs font-bold flex items-center justify-center mt-0.5">
                           {i + 1}
                         </span>
-                        <p className="text-slate-600 text-sm leading-relaxed">{hint}</p>
+                        <p className="text-slate-300 text-sm leading-relaxed">{hint}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {!isAnalyzing && analysisResult && (
+            <div className="space-y-4">
+              <div className={`p-4 rounded-2xl border flex items-start gap-3 ${
+                analysisResult.analysis.isOptimal
+                  ? 'bg-emerald-50 border-emerald-200'
+                  : 'bg-amber-500/20 border-amber-500/30'
+              }`}>
+                <div className={`mt-0.5 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
+                  analysisResult.analysis.isOptimal ? 'bg-emerald-500/30' : 'bg-amber-500/30'
+                }`}>
+                  {analysisResult.analysis.isOptimal ? (
+                    <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z" />
+                    </svg>
+                  )}
+                </div>
+                <div>
+                  <p className={`text-base font-semibold mb-0.5 ${
+                    analysisResult.analysis.isOptimal ? 'text-emerald-400' : 'text-amber-400'
+                  }`}>
+                    {analysisResult.analysis.isOptimal ? 'Optimal Solution' : 'Not Optimal'}
+                  </p>
+                  <p className="text-slate-300 text-sm leading-relaxed">{analysisResult.analysis.optimalityExplanation}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="soft-card p-3 rounded-2xl space-y-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                    <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Time</span>
+                  </div>
+                  <p className="text-2xl font-bold font-mono text-slate-100">{analysisResult.analysis.timeComplexity}</p>
+                  <p className="text-sm text-slate-500 leading-relaxed">{analysisResult.analysis.timeComplexityReason}</p>
+                </div>
+                <div className="soft-card p-3 rounded-2xl space-y-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-violet-500" />
+                    <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Space</span>
+                  </div>
+                  <p className="text-2xl font-bold font-mono text-slate-100">{analysisResult.analysis.spaceComplexity}</p>
+                  <p className="text-sm text-slate-500 leading-relaxed">{analysisResult.analysis.spaceComplexityReason}</p>
+                </div>
+              </div>
+
+              <div className="soft-card p-4 rounded-2xl space-y-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                  </svg>
+                  <span className="text-base font-medium text-slate-100">Feedback</span>
+                </div>
+                <p className="text-slate-300 text-sm leading-relaxed">{analysisResult.analysis.feedback}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Hint section — always shown below analysis results */}
+          {!isAnalyzing && analysisResult && (
+            <div className="border-t border-slate-700 pt-4 space-y-3">
+              {!isHinting && !hintResult && (
+                <button
+                  onClick={getHint}
+                  className="w-full flex items-center justify-center gap-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-400 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  What am I doing wrong?
+                </button>
+              )}
+
+              {isHinting && (
+                <div className="soft-card p-6 rounded-2xl flex flex-col items-center justify-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <div
+                        key={i}
+                        className="w-1.5 h-5 bg-amber-500 rounded-full animate-pulse"
+                        style={{ animationDelay: `${i * 0.12}s`, animationDuration: '0.8s' }}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-slate-500 text-sm">Reviewing your code…</p>
+                </div>
+              )}
+
+              {!isHinting && hintResult && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm font-medium text-slate-100">Hints</span>
+                    </div>
+                    <button
+                      onClick={getHint}
+                      className="text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1 rounded-lg font-medium transition-colors"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                  <div className="bg-amber-500/20 border border-amber-500/30 px-4 py-2 rounded-xl">
+                    <span className="text-xs font-medium text-amber-400 uppercase tracking-wider">Area to focus on</span>
+                    <p className="text-amber-300 text-sm font-medium mt-0.5">{hintResult.area}</p>
+                  </div>
+                  <div className="space-y-2">
+                    {hintResult.hints.map((hint, i) => (
+                      <div key={i} className="flex gap-3 soft-card p-3 rounded-xl">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-500/30 border border-amber-500/50 text-amber-400 text-xs font-bold flex items-center justify-center mt-0.5">
+                          {i + 1}
+                        </span>
+                        <p className="text-slate-300 text-sm leading-relaxed">{hint}</p>
                       </div>
                     ))}
                   </div>
@@ -933,25 +982,25 @@ export default function ProblemClient({ problem, savedCode, savedAnalysis, saved
 
       {/* Playcard saved toast */}
       {playcardToast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-white border border-violet-200 text-slate-800 px-4 py-3 rounded-2xl shadow-xl animate-fade-in-up">
-          <div className="w-8 h-8 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center shrink-0">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-violet-600">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-slate-800 border border-slate-600 text-slate-100 px-4 py-3 rounded-2xl shadow-xl animate-fade-in-up">
+          <div className="w-8 h-8 rounded-xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-violet-400">
               <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-medium text-slate-800">Playcard saved!</span>
-            <span className="text-xs text-slate-400">Added to your Problems collection</span>
+            <span className="text-sm font-medium text-slate-100">Playcard saved!</span>
+            <span className="text-xs text-slate-500">Added to your Problems collection</span>
           </div>
           <Link
             href="/playcards?tab=problems"
-            className="ml-2 text-xs text-violet-600 hover:text-violet-700 font-medium whitespace-nowrap transition-colors"
+            className="ml-2 text-xs text-violet-400 hover:text-violet-300 font-medium whitespace-nowrap transition-colors"
             onClick={() => setPlaycardToast(false)}
           >
             View →
           </Link>
           <button
-            className="ml-1 text-slate-400 hover:text-slate-600 transition-colors"
+            className="ml-1 text-slate-500 hover:text-slate-300 transition-colors"
             onClick={() => setPlaycardToast(false)}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">

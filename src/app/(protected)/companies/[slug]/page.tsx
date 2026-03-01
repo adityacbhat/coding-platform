@@ -26,8 +26,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in-up">
       <div>
-        <Link href="/companies" className="text-indigo-600 hover:text-indigo-700 text-sm mb-4 inline-block font-medium">&larr; Back to Companies</Link>
-        <h1 className="text-4xl font-bold text-slate-800 mb-2">{company.name}</h1>
+        <Link href="/companies" className="text-indigo-400 hover:text-indigo-300 text-sm mb-4 inline-block font-medium">&larr; Back to Companies</Link>
+        <h1 className="text-4xl font-bold text-slate-100 mb-2">{company.name}</h1>
         <p className="text-xl text-slate-500">{problems.length} problems asked in interviews</p>
       </div>
 
@@ -48,21 +48,21 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
 
       {problems.length > 0 ? (
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-slate-800">Problems</h2>
+          <h2 className="text-2xl font-bold text-slate-100">Problems</h2>
           <div className="soft-card rounded-2xl overflow-hidden shadow-sm">
             <table className="w-full text-left text-sm">
-              <thead className="bg-violet-50/20 text-xs uppercase text-slate-400 font-semibold border-b border-violet-100/30">
+              <thead className="bg-slate-800/60 text-xs uppercase text-slate-500 font-semibold border-b border-slate-700">
                 <tr>
                   <th className="px-6 py-3">Title</th>
                   <th className="px-6 py-3">Difficulty</th>
                   <th className="px-6 py-3">Concepts</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-violet-100/20">
+              <tbody className="divide-y divide-slate-700">
                 {problems.map((problem) => (
-                  <tr key={problem.id} className="hover:bg-slate-50/80 transition-colors">
+                  <tr key={problem.id} className="hover:bg-slate-700/50 transition-colors">
                     <td className="px-6 py-4">
-                      <Link href={`/problems/${problem.slug}`} className="text-slate-700 hover:text-indigo-600 transition-colors font-medium">
+                      <Link href={`/problems/${problem.slug}`} className="text-slate-300 hover:text-indigo-400 transition-colors font-medium">
                         {problem.title}
                       </Link>
                     </td>
@@ -75,7 +75,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1">
                         {problem.concepts.map((concept) => (
-                          <span key={concept.slug} className="text-xs bg-slate-100 px-2 py-0.5 rounded-lg text-slate-600 font-medium">
+                          <span key={concept.slug} className="text-xs bg-slate-700 px-2 py-0.5 rounded-lg text-slate-300 font-medium">
                             {concept.title}
                           </span>
                         ))}

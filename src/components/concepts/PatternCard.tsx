@@ -12,17 +12,17 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   const difficultyColors = {
-    Easy: 'text-emerald-600 bg-emerald-50 border-emerald-200',
-    Medium: 'text-amber-600 bg-amber-50 border-amber-200',
-    Hard: 'text-rose-600 bg-rose-50 border-rose-200',
+    Easy: 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30',
+    Medium: 'text-amber-400 bg-amber-500/20 border-amber-500/30',
+    Hard: 'text-rose-400 bg-rose-500/20 border-rose-500/30',
   };
 
   return (
     <div
       className={`
-        bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm
+        bg-slate-800/60 border border-slate-700 rounded-2xl overflow-hidden shadow-sm
         transition-all duration-300 ease-out
-        ${expanded ? 'ring-1 ring-indigo-300' : ''}
+        ${expanded ? 'ring-1 ring-indigo-500/50' : ''}
       `}
       style={{
         animationDelay: `${index * 0.1}s`,
@@ -30,12 +30,12 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
     >
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full p-5 text-left flex items-center justify-between hover:bg-slate-50 transition-colors"
+        className="w-full p-5 text-left flex items-center justify-between hover:bg-slate-700/50 transition-colors"
       >
         <div className="flex items-center gap-4">
-          <span className="text-slate-400 font-mono text-sm w-6">{index + 1}.</span>
+          <span className="text-slate-500 font-mono text-sm w-6">{index + 1}.</span>
           <div>
-            <h4 className="text-lg font-semibold text-slate-800">{problem.title}</h4>
+            <h4 className="text-lg font-semibold text-slate-100">{problem.title}</h4>
             <span
               className={`text-xs px-2 py-0.5 rounded-lg border mt-1 inline-block font-medium ${difficultyColors[problem.difficulty]}`}
             >
@@ -44,7 +44,7 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
           </div>
         </div>
         <svg
-          className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${
+          className={`w-5 h-5 text-slate-500 transition-transform duration-300 ${
             expanded ? 'rotate-180' : ''
           }`}
           fill="none"
@@ -61,12 +61,12 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
           ${expanded ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0'}
         `}
       >
-        <div className="px-5 pb-5 space-y-5 border-t border-slate-100 pt-5">
+        <div className="px-5 pb-5 space-y-5 border-t border-slate-700 pt-5">
           <div>
-            <h5 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            <h5 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">
               Explanation
             </h5>
-            <p className="text-slate-600 leading-relaxed">{problem.explanation}</p>
+            <p className="text-slate-300 leading-relaxed">{problem.explanation}</p>
           </div>
 
           {problem.examples && problem.examples.length > 0 && (
@@ -142,7 +142,7 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
               {problem.recognitionCues.map((cue, i) => (
                 <span
                   key={i}
-                  className="text-sm bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full border border-indigo-200 font-medium"
+                  className="text-sm bg-indigo-500/20 text-indigo-400 px-3 py-1 rounded-full border border-indigo-500/30 font-medium"
                 >
                   {cue}
                 </span>
@@ -169,7 +169,7 @@ export default function PatternCard({ problem, index }: PatternCardProps) {
             </h5>
             <ul className="space-y-2">
               {problem.mentalChecklist.map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-slate-600">
+                <li key={i} className="flex items-start gap-3 text-slate-300">
                   <span className="text-amber-500 mt-1">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

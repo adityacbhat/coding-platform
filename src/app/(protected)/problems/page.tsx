@@ -28,7 +28,7 @@ export default async function ProblemsPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-8 text-slate-800">Practice Problems</h1>
+      <h1 className="text-3xl font-bold mb-8 text-slate-100">Practice Problems</h1>
       <ProblemsClient
         initialProblems={problems}
         concepts={concepts.map(c => ({ slug: c.slug, title: c.title }))}

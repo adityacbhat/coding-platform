@@ -419,7 +419,7 @@ export function PlaycardDeckView({ cards, onDelete, onEdit }: PlaycardDeckViewPr
 
       <p className="text-xs text-slate-400">
         <kbd className="px-1.5 py-0.5 rounded bg-violet-100/30 border border-violet-200/30 font-mono text-slate-500">←</kbd>
-        {' '}<kbd className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono text-slate-500">→</kbd>
+        {' '}<kbd className="px-1.5 py-0.5 rounded bg-slate-700 border border-slate-600 font-mono text-slate-400">→</kbd>
         {' '}to navigate ·{' '}
         <kbd className="px-1.5 py-0.5 rounded bg-violet-100/30 border border-violet-200/30 font-mono text-slate-500">Enter</kbd>
         {' '}to flip

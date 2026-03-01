@@ -79,7 +79,7 @@ export default function InterviewClient({ companies }: Props) {
     return (
       <div className="space-y-6 animate-fade-in-up">
         <div className="flex items-center justify-between soft-card p-4 rounded-2xl sticky top-4 z-10 shadow-md">
-          <div className="text-lg font-semibold text-slate-800">
+          <div className="text-lg font-semibold text-slate-100">
             Interview Session
           </div>
           <div className={`text-2xl font-mono font-bold ${
@@ -95,18 +95,18 @@ export default function InterviewClient({ companies }: Props) {
               key={problem.id}
               href={`/problems/${problem.slug}`}
               target="_blank"
-              className="block soft-card p-4 rounded-2xl hover:border-indigo-300 hover:shadow-md transition-all card-hover"
+              className="block soft-card p-4 rounded-2xl hover:border-indigo-500/50 hover:shadow-md transition-all card-hover"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-8 h-8 bg-indigo-50 rounded-xl flex items-center justify-center text-sm font-medium text-indigo-600">
+                  <div className="w-8 h-8 bg-indigo-500/20 rounded-xl flex items-center justify-center text-sm font-medium text-indigo-400">
                     {idx + 1}
                   </div>
                   <div>
-                    <div className="font-medium text-slate-800">{problem.title}</div>
+                    <div className="font-medium text-slate-100">{problem.title}</div>
                     <div className="flex gap-2 mt-1">
                       {problem.concepts.slice(0, 2).map((c) => (
-                        <span key={c.slug} className="text-xs bg-slate-100 px-2 py-0.5 rounded-lg text-slate-500">
+                        <span key={c.slug} className="text-xs bg-slate-700 px-2 py-0.5 rounded-lg text-slate-400">
                           {c.title}
                         </span>
                       ))}
@@ -114,9 +114,9 @@ export default function InterviewClient({ companies }: Props) {
                   </div>
                 </div>
                 <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${
-                  problem.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
-                  problem.difficulty === 'Medium' ? 'bg-amber-50 text-amber-600 border border-amber-200' :
-                  'bg-rose-50 text-rose-600 border border-rose-200'
+                  problem.difficulty === 'Easy' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                  problem.difficulty === 'Medium' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                  'bg-rose-500/20 text-rose-400 border border-rose-500/30'
                 }`}>
                   {problem.difficulty}
                 </span>
@@ -130,7 +130,7 @@ export default function InterviewClient({ companies }: Props) {
             setSessionStarted(false);
             setProblems(null);
           }}
-          className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-xl font-medium transition-colors"
+          className="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 py-3 rounded-xl font-medium transition-colors"
         >
           End Session
         </button>
@@ -142,18 +142,18 @@ export default function InterviewClient({ companies }: Props) {
     return (
       <div className="space-y-6 animate-fade-in-up">
         <div className="soft-card p-6 rounded-2xl shadow-sm">
-          <h2 className="text-xl font-bold text-slate-800 mb-4">Generated Problems</h2>
+          <h2 className="text-xl font-bold text-slate-100 mb-4">Generated Problems</h2>
           <div className="space-y-3">
             {problems.map((problem, idx) => (
-              <div key={problem.id} className="flex items-center justify-between p-3 bg-violet-50/30 rounded-xl">
+              <div key={problem.id} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-xl">
                 <div className="flex items-center gap-3">
                   <span className="text-slate-400 text-sm">{idx + 1}.</span>
-                  <span className="text-slate-800 font-medium">{problem.title}</span>
+                  <span className="text-slate-100 font-medium">{problem.title}</span>
                 </div>
                 <span className={`text-xs px-2.5 py-1 rounded-lg font-semibold ${
-                  problem.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-600' :
-                  problem.difficulty === 'Medium' ? 'bg-amber-50 text-amber-600' :
-                  'bg-rose-50 text-rose-600'
+                  problem.difficulty === 'Easy' ? 'bg-emerald-500/20 text-emerald-400' :
+                  problem.difficulty === 'Medium' ? 'bg-amber-500/20 text-amber-400' :
+                  'bg-rose-500/20 text-rose-400'
                 }`}>
                   {problem.difficulty}
                 </span>
@@ -179,7 +179,7 @@ export default function InterviewClient({ companies }: Props) {
 
         <button
           onClick={() => setProblems(null)}
-          className="w-full text-slate-400 hover:text-indigo-600 py-2 transition-colors"
+          className="w-full text-slate-500 hover:text-indigo-400 py-2 transition-colors"
         >
           Change Settings
         </button>
@@ -191,11 +191,11 @@ export default function InterviewClient({ companies }: Props) {
     <div className="space-y-6">
       <div className="soft-card p-6 rounded-2xl space-y-6 shadow-sm">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Target Company (Optional)</label>
+          <label className="block text-sm font-medium text-slate-300 mb-2">Target Company (Optional)</label>
           <select
             value={config.company}
             onChange={(e) => setConfig((prev) => ({ ...prev, company: e.target.value }))}
-            className="w-full bg-white/40 border border-violet-200/30 rounded-xl px-4 py-2.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition"
+            className="w-full bg-slate-800/60 border border-slate-600 rounded-xl px-4 py-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition"
           >
             <option value="">Any Company</option>
             {companies.map((company) => (
@@ -223,8 +223,8 @@ export default function InterviewClient({ companies }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
-            Time Limit: <span className="text-indigo-600 font-bold">{config.timeLimit} minutes</span>
+          <label className="block text-sm font-medium text-slate-300 mb-2">
+            Time Limit: <span className="text-indigo-400 font-bold">{config.timeLimit} minutes</span>
           </label>
           <input
             type="range"
@@ -242,10 +242,10 @@ export default function InterviewClient({ companies }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-4">Difficulty Distribution</label>
+          <label className="block text-sm font-medium text-slate-300 mb-4">Difficulty Distribution</label>
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-emerald-100/30 border border-emerald-200/30 p-4 rounded-xl text-center">
-              <div className="text-emerald-600 text-2xl font-bold">{config.easyPercent}%</div>
+            <div className="bg-emerald-500/20 border border-emerald-500/30 p-4 rounded-xl text-center">
+              <div className="text-emerald-400 text-2xl font-bold">{config.easyPercent}%</div>
               <div className="text-sm text-slate-500">Easy</div>
               <input
                 type="range"
@@ -257,8 +257,8 @@ export default function InterviewClient({ companies }: Props) {
                 className="w-full mt-2"
               />
             </div>
-            <div className="bg-amber-100/30 border border-amber-200/30 p-4 rounded-xl text-center">
-              <div className="text-amber-600 text-2xl font-bold">{config.mediumPercent}%</div>
+            <div className="bg-amber-500/20 border border-amber-500/30 p-4 rounded-xl text-center">
+              <div className="text-amber-400 text-2xl font-bold">{config.mediumPercent}%</div>
               <div className="text-sm text-slate-500">Medium</div>
               <input
                 type="range"
@@ -270,8 +270,8 @@ export default function InterviewClient({ companies }: Props) {
                 className="w-full mt-2"
               />
             </div>
-            <div className="bg-rose-100/30 border border-rose-200/30 p-4 rounded-xl text-center">
-              <div className="text-rose-600 text-2xl font-bold">{config.hardPercent}%</div>
+            <div className="bg-rose-500/20 border border-rose-500/30 p-4 rounded-xl text-center">
+              <div className="text-rose-400 text-2xl font-bold">{config.hardPercent}%</div>
               <div className="text-sm text-slate-500">Hard</div>
               <input
                 type="range"

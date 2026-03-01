@@ -79,8 +79,8 @@ export default function PlaycardsClient() {
               key={tab.id}
               className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeTab === tab.id
-                  ? 'bg-white/60 text-slate-800 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'bg-slate-700/60 text-slate-100 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-300'
               }`}
               onClick={() => setActiveTab(tab.id)}
             >
@@ -107,7 +107,7 @@ export default function PlaycardsClient() {
 
       {loading ? (
         <div className="flex items-center justify-center py-28">
-          <div className="w-7 h-7 border-2 border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
+          <div className="w-7 h-7 border-2 border-slate-600 border-t-indigo-500 rounded-full animate-spin" />
         </div>
       ) : adding ? (
         <div className="flex justify-center py-6">

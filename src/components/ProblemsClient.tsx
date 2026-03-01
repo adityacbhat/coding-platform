@@ -63,7 +63,7 @@ export default function ProblemsClient({ initialProblems, concepts, companies, p
     <div className="flex gap-6 animate-fade-in-up">
       <div className={`${showFilters ? 'w-64' : 'w-0'} shrink-0 transition-all duration-300 overflow-hidden`}>
         <div className="soft-card rounded-2xl p-4 sticky top-4">
-          <h2 className="text-lg font-semibold text-slate-800 mb-4">Filters</h2>
+          <h2 className="text-lg font-semibold text-slate-100 mb-4">Filters</h2>
           <ProblemFilters
             concepts={concepts}
             companies={companies}
@@ -156,7 +156,7 @@ export default function ProblemsClient({ initialProblems, concepts, companies, p
                         <span className="text-slate-300">—</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 font-medium text-slate-700">
+                    <td className="px-6 py-4 font-medium text-slate-200">
                       <Link href={`/problems/${problem.slug}`} className="hover:text-indigo-600 transition-colors">
                         {problem.title}
                       </Link>
