@@ -157,6 +157,7 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
   const [vizResults, setVizResults] = useState<Record<number, VisualizationData>>({});
   const [vizErrors, setVizErrors] = useState<Record<number, string>>({});
   const [activeTab, setActiveTab] = useState<'description' | 'testcases' | 'results'>('description');
+  const [runType, setRunType] = useState<'run' | 'submit' | null>(null);
   const [testResults, setTestResults] = useState<ExecuteResult | null>(
     savedResults ? (savedResults as unknown as ExecuteResult) : null
   );
@@ -189,6 +190,7 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
 
   const runCode = async () => {
     setIsRunning(true);
+    setRunType('run');
     setActiveTab('results');
     setOutput('');
     setError('');
@@ -218,6 +220,7 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
 
   const submitCode = async () => {
     setIsSubmitting(true);
+    setRunType('submit');
     setActiveTab('results');
     setOutput('');
     setError('');
@@ -525,7 +528,12 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
                   : 'text-slate-500 hover:text-slate-300'
               }`}
             >
-              Test Cases ({problem.testCases?.length ?? 0})
+              Test Cases
+              {!isRunning && !isSubmitting && testResults && testResults.results.some((r) => !r.passed) && (
+                <span className="ml-2 text-xs px-1.5 py-0.5 rounded-lg bg-rose-500/20 text-rose-400">
+                  {testResults.results.filter((r) => !r.passed).length} failed
+                </span>
+              )}
             </button>
             <button
               onClick={() => setActiveTab('results')}
@@ -589,29 +597,6 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
                 </ReactMarkdown>
               </div>
               
-              {problem.testCases && problem.testCases.length > 0 && (
-                <>
-                  <h3 className="text-md font-semibold text-slate-100 mb-3">Examples</h3>
-                  <div className="space-y-4">
-                    {problem.testCases.slice(0, 2).map((testCase, idx) => (
-                      <div key={testCase.id} className="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
-                        <div className="text-xs text-slate-400 mb-2">Example {idx + 1}</div>
-                        <div className="space-y-2 text-sm font-mono">
-                          <div>
-                            <span className="text-slate-400 select-none">Input: </span>
-                            <span className="text-slate-200">{formatTestInput(testCase.input)}</span>
-                          </div>
-                          <div>
-                            <span className="text-slate-400 select-none">Output: </span>
-                            <span className="text-slate-200">{JSON.stringify(testCase.expectedOutput)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-
               {problem.constraints && problem.constraints.length > 0 && (
                 <div className="mt-6">
                   <h3 className="text-md font-semibold text-slate-100 mb-3">Constraints</h3>
@@ -627,23 +612,56 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
 
           {activeTab === 'testcases' && (
             <div className="space-y-4">
-              {problem.testCases?.map((testCase, idx) => (
-                <div key={testCase.id} className="soft-card p-4 rounded-2xl">
-                  <div className="text-sm font-medium text-slate-100 mb-3">Test Case {idx + 1}</div>
-                  <div className="space-y-3">
-                    <div>
-                      <div className="text-xs text-slate-400 mb-1">Input</div>
-                      <pre className="bg-slate-900 p-3 rounded-xl text-sm font-mono text-slate-300 overflow-x-auto">
-                        {formatTestInput(testCase.input)}
-                      </pre>
-                    </div>
-                    <div>
-                      <div className="text-xs text-slate-400 mb-1">Expected Output</div>
-                      <pre className="bg-slate-900 p-3 rounded-xl text-sm font-mono text-emerald-400 overflow-x-auto">
-                        {JSON.stringify(testCase.expectedOutput, null, 2)}
-                      </pre>
-                    </div>
+              {!testResults && (
+                <div className="soft-card p-8 rounded-2xl text-center">
+                  <p className="text-slate-400">Run your code to see failed test cases here.</p>
+                </div>
+              )}
+              {testResults && testResults.results.every((r) => r.passed) && (
+                <div className="soft-card p-8 rounded-2xl flex flex-col items-center gap-3 text-center">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
                   </div>
+                  <p className="text-emerald-400 font-medium">All test cases passed!</p>
+                </div>
+              )}
+              {testResults && testResults.results.filter((r) => !r.passed).map((result, idx) => (
+                <div key={result.testCaseId} className="soft-card p-4 rounded-2xl border-rose-300/30">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="w-2 h-2 rounded-full bg-rose-500" />
+                    <span className="text-sm font-medium text-slate-100">Failed Test Case {idx + 1}</span>
+                  </div>
+                  {result.error ? (
+                    <div className="bg-slate-900 p-3 rounded-xl">
+                      <div className="text-xs text-slate-500 mb-1">Error</div>
+                      <pre className="text-sm font-mono text-rose-400 whitespace-pre-wrap">{result.error}</pre>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div>
+                        <div className="text-xs text-slate-400 mb-1">Input</div>
+                        <pre className="bg-slate-900 p-2 rounded-xl text-xs font-mono text-slate-300">
+                          {formatTestInput(result.input)}
+                        </pre>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="text-xs text-slate-400 mb-1">Expected</div>
+                          <pre className="bg-slate-900 p-2 rounded-xl text-xs font-mono text-emerald-400">
+                            {JSON.stringify(result.expected)}
+                          </pre>
+                        </div>
+                        <div>
+                          <div className="text-xs text-slate-400 mb-1">Your Output</div>
+                          <pre className="bg-slate-900 p-2 rounded-xl text-xs font-mono text-rose-400">
+                            {JSON.stringify(result.actual)}
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

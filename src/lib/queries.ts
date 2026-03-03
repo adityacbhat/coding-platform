@@ -311,6 +311,60 @@ export async function getUserActivity(userId: string) {
   return Array.from(countByDate.entries()).map(([date, count]) => ({ date, count }));
 }
 
+export async function getAdminProblems() {
+  const problems = await prisma.problem.findMany({
+    include: {
+      concepts: {
+        include: {
+          concept: { select: { slug: true, title: true } },
+        },
+      },
+      companies: {
+        include: {
+          company: { select: { slug: true, name: true } },
+        },
+      },
+      _count: {
+        select: { testCases: true },
+      },
+    },
+    orderBy: { id: 'asc' },
+  });
+
+  return problems.map((p) => ({
+    id: p.id,
+    title: p.title,
+    slug: p.slug,
+    difficulty: p.difficulty as 'Easy' | 'Medium' | 'Hard',
+    frequency: p.frequency,
+    acceptance: p.acceptance,
+    concepts: p.concepts.map((pc) => pc.concept),
+    companies: p.companies.map((pc) => pc.company),
+    testCaseCount: p._count.testCases,
+  }));
+}
+
+export async function getAdminProblemBySlug(slug: string) {
+  return prisma.problem.findUnique({
+    where: { slug },
+    include: {
+      testCases: {
+        orderBy: { orderIndex: 'asc' },
+      },
+      concepts: {
+        include: {
+          concept: { select: { id: true, slug: true, title: true } },
+        },
+      },
+      companies: {
+        include: {
+          company: { select: { id: true, slug: true, name: true } },
+        },
+      },
+    },
+  });
+}
+
 export async function getStats() {
   const [problemCount, conceptCount, companyCount] = await Promise.all([
     prisma.problem.count(),

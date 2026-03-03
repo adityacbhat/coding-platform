@@ -1,29 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
 import { prisma } from '@/lib/db';
 import type { AnalysisData } from '@/app/api/analyze/route';
 import type { AlgorithmAnalysisData } from '@/app/api/analyze-algorithm/route';
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-type ChatMessage = { 
-  role: 'user' | 'assistant'; 
+type ChatMessage = {
+  role: 'user' | 'assistant';
   content: string;
-  reasoning_details?: unknown;
-};
-
-type OpenRouterMessage = {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-  reasoning_details?: unknown;
-};
-
-type OpenRouterResponse = {
-  choices: Array<{
-    message: {
-      content: string;
-      reasoning_details?: unknown;
-    };
-  }>;
 };
 
 export async function POST(request: NextRequest) {
@@ -76,41 +61,22 @@ ${solutionBlock}
 Your previous feedback:
 ${analysisText}`;
 
-  const apiMessages: OpenRouterMessage[] = [
-    { role: 'system', content: systemContext },
-    ...messages.map((m) => ({ 
-      role: m.role as 'user' | 'assistant', 
-      content: m.content,
-      ...(m.reasoning_details ? { reasoning_details: m.reasoning_details } : {})
-    })),
-    { role: 'user', content: userMessage },
-  ];
-
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "arcee-ai/trinity-mini:free",
-      messages: apiMessages,
-      reasoning: { enabled: true }
-    })
+  const message = await anthropic.messages.create({
+    model: 'claude-haiku-4-5',
+    max_tokens: 1024,
+    system: systemContext,
+    messages: [
+      ...messages.map((m) => ({ role: m.role, content: m.content })),
+      { role: 'user', content: userMessage },
+    ],
   });
 
-  const result = await response.json() as OpenRouterResponse;
-  
-  if (!result.choices || !result.choices[0]?.message) {
-    return NextResponse.json({ error: 'Unexpected response from AI' }, { status: 500 });
-  }
+  const reply = message.content
+    .filter((block) => block.type === 'text')
+    .map((block) => block.text)
+    .join('');
 
-  const assistantMessage = result.choices[0].message;
-
-  return NextResponse.json({ 
-    reply: assistantMessage.content,
-    reasoning_details: assistantMessage.reasoning_details
-  });
+  return NextResponse.json({ reply });
 }
 
 function formatCodeAnalysisContext(a: AnalysisData): string {

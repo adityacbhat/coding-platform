@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { isAdmin } from '@/lib/admin';
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -25,13 +26,18 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  const protectedPaths = ['/dashboard', '/problems', '/concepts', '/companies', '/interview', '/playcards'];
+  const protectedPaths = ['/dashboard', '/problems', '/concepts', '/companies', '/interview', '/playcards', '/admin'];
   const isProtected = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
 
   if (!user && isProtected) {
     return NextResponse.redirect(new URL('/signin', request.url));
+  }
+
+  // Redirect non-admin users away from /admin/* paths
+  if (user && request.nextUrl.pathname.startsWith('/admin') && !isAdmin(user.email)) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   // Redirect signed-in users away from auth pages to dashboard

@@ -1,16 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
+import { jsonrepair } from 'jsonrepair';
 import { prisma } from '@/lib/db';
 import { createClient } from '@/lib/supabase/server';
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-
-type OpenRouterResponse = {
-  choices: Array<{
-    message: {
-      content: string;
-    };
-  }>;
-};
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export type AnalysisData = {
   isOptimal: boolean;
@@ -59,27 +53,21 @@ JSON format (keep every value short — one sentence max):
   "feedback": "2-3 short sentences on algorithmic quality and the most important improvement. Do not mention syntax or indentation."
 }`;
 
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "arcee-ai/trinity-mini:free",
-      messages: [{ role: "user", content: prompt }],
-      reasoning: { enabled: true }
-    })
+  const message = await anthropic.messages.create({
+    model: 'claude-haiku-4-5',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
   });
 
-  const result = await response.json() as OpenRouterResponse;
+  const rawText = message.content
+    .filter((block) => block.type === 'text')
+    .map((block) => block.text)
+    .join('')
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim();
 
-  if (!result.choices || !result.choices[0]?.message) {
-    return NextResponse.json({ error: 'Unexpected response from AI' }, { status: 500 });
-  }
-
-  const rawText = result.choices[0].message.content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-  const analysis: AnalysisData = JSON.parse(rawText);
+  const analysis: AnalysisData = JSON.parse(jsonrepair(rawText));
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

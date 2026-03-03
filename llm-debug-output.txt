@@ -1,0 +1,1365 @@
+=== RAW LLM OUTPUT ===
+```json
+{
+  "summary": {
+    "bug_location": {
+      "line": 8,
+      "reason": "Returns a tuple (d[v], i) instead of a list [d[v], i], causing type mismatch"
+    },
+    "first_divergence_step": 6,
+    "high_level_cause": "The function returns a tuple instead of a list as required by the return type annotation."
+  },
+  "assumptions": [
+    "The input nums is [3,2,4] and target is 6",
+    "List indexing is 0-based",
+    "The problem requires returning a list of two indices",
+    "Dictionary lookup and insertion are O(1) operations"
+  ],
+  "tracked": [
+    "i",
+    "nums[i]",
+    "v",
+    "d"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "line": 4,
+      "event": "Initialize empty dictionary d",
+      "before": {},
+      "after": {
+        "d": {}
+      },
+      "diff": [
+        {
+          "field": "d",
+          "from": "undefined",
+          "to": {},
+          "impact": "Dictionary created to store value-to-index mapping"
+        }
+      ],
+      "notes": "Starting the two-sum algorithm with hash map approach"
+    },
+    {
+      "step": 2,
+      "line": 5,
+      "event": "Loop starts, i=0",
+      "before": {
+        "d": {}
+      },
+      "after": {
+        "i": 0,
+        "d": {}
+      },
+      "diff": [
+        {
+          "field": "i",
+          "from": "undefined",
+          "to": 0,
+          "impact": "First iteration begins"
+        }
+      ],
+      "notes": "Iterating through nums array"
+    },
+    {
+      "step": 3,
+      "line": 6,
+      "event": "Calculate v=6-3=3, nums[0]=3",
+      "before": {
+        "i": 0,
+        "d": {}
+      },
+      "after": {
+        "i": 0,
+        "v": 3,
+        "nums[i]": 3,
+        "d": {}
+      },
+      "diff": [
+        {
+          "field": "v",
+          "from": "undefined",
+          "to": 3,
+          "impact": "Complement value calculated"
+        }
+      ],
+      "notes": "Computing the complement needed to reach target"
+    },
+    {
+      "step": 4,
+      "line": 7,
+      "event": "Check if 3 in d: False",
+      "before": {
+        "i": 0,
+        "v": 3,
+        "nums[i]": 3,
+        "d": {}
+      },
+      "after": {
+        "i": 0,
+        "v": 3,
+        "nums[i]": 3,
+        "d": {}
+      },
+      "diff": [],
+      "notes": "Complement not found in dictionary, proceeding to else branch"
+    },
+    {
+      "step": 5,
+      "line": 11,
+      "event": "Store d[3]=0",
+      "before": {
+        "i": 0,
+        "v": 3,
+        "nums[i]": 3,
+        "d": {}
+      },
+      "after": {
+        "i": 0,
+        "v": 3,
+        "nums[i]": 3,
+        "d": {
+          "3": 0
+        }
+      },
+      "diff": [
+        {
+          "field": "d",
+          "from": {},
+          "to": {
+            "3": 0
+          },
+          "impact": "Stored mapping from value 3 to index 0"
+        }
+      ],
+      "notes": "Adding current element to hash map"
+    },
+    {
+      "step": 6,
+      "line": 5,
+      "event": "Loop continues, i=1",
+      "before": {
+        "i": 0,
+        "v": 3,
+        "nums[i]": 3,
+        "d": {
+          "3": 0
+        }
+      },
+      "after": {
+        "i": 1,
+        "d": {
+          "3": 0
+        }
+      },
+      "diff": [
+        {
+          "field": "i",
+          "from": 0,
+          "to": 1,
+          "impact": "Moving to next element"
+        }
+      ],
+      "notes": "Second iteration"
+    },
+    {
+      "step": 7,
+      "line": 6,
+      "event": "Calculate v=6-2=4, nums[1]=2",
+      "before": {
+        "i": 1,
+        "d": {
+          "3": 0
+        }
+      },
+      "after": {
+        "i": 1,
+        "v": 4,
+        "nums[i]": 2,
+        "d": {
+          "3": 0
+        }
+      },
+      "diff": [
+        {
+          "field": "v",
+          "from": 3,
+          "to": 4,
+          "impact": "New complement calculated"
+        },
+        {
+          "field": "nums[i]",
+          "from": 3,
+          "to": 2,
+          "impact": "Current element is 2"
+        }
+      ],
+      "notes": "Computing complement for nums[1]=2"
+    },
+    {
+      "step": 8,
+      "line": 7,
+      "event": "Check if 4 in d: False",
+      "before": {
+        "i": 1,
+        "v": 4,
+        "nums[i]": 2,
+        "d": {
+          "3": 0
+        }
+      },
+      "after": {
+        "i": 1,
+        "v": 4,
+        "nums[i]": 2,
+        "d": {
+          "3": 0
+        }
+      },
+      "diff": [],
+      "notes": "Complement 4 not in dictionary yet"
+    },
+    {
+      "step": 9,
+      "line": 11,
+      "event": "Store d[2]=1",
+      "before": {
+        "i": 1,
+        "v": 4,
+        "nums[i]": 2,
+        "d": {
+          "3": 0
+        }
+      },
+      "after": {
+        "i": 1,
+        "v": 4,
+        "nums[i]": 2,
+        "d": {
+          "3": 0,
+          "2": 1
+        }
+      },
+      "diff": [
+        {
+          "field": "d",
+          "from": {
+            "3": 0
+          },
+          "to": {
+            "3": 0,
+            "2": 1
+          },
+          "impact": "Stored mapping from value 2 to index 1"
+        }
+      ],
+      "notes": "Adding second element to hash map"
+    },
+    {
+      "step": 10,
+      "line": 5,
+      "event": "Loop continues, i=2",
+      "before": {
+        "i": 1,
+        "v": 4,
+        "nums[i]": 2,
+        "d": {
+          "3": 0,
+          "2": 1
+        }
+      },
+      "after": {
+        "i": 2,
+        "d": {
+          "3": 0,
+          "2": 1
+        }
+      },
+      "diff": [
+        {
+          "field": "i",
+          "from": 1,
+          "to": 2,
+          "impact": "Moving to third element"
+        }
+      ],
+      "notes": "Third iteration"
+    },
+    {
+      "step": 11,
+      "line": 6,
+      "event": "Calculate v=6-4=2, nums[2]=4",
+      "before": {
+        "i": 2,
+        "d": {
+          "3": 0,
+          "2": 1
+        }
+      },
+      "after": {
+        "i": 2,
+        "v": 2,
+        "nums[i]": 4,
+        "d": {
+          "3": 0,
+          "2": 1
+        }
+      },
+      "diff": [
+        {
+          "field": "v",
+          "from": 4,
+          "to": 2,
+          "impact": "New complement calculated"
+        },
+        {
+          "field": "nums[i]",
+          "from": 2,
+          "to": 4,
+          "impact": "Current element is 4"
+        }
+      ],
+      "notes": "Computing complement for nums[2]=4"
+    },
+    {
+      "step": 12,
+      "line": 7,
+      "event": "Check if 2 in d: True",
+      "before": {
+        "i": 2,
+        "v": 2,
+        "nums[i]": 4,
+        "d": {
+          "3": 0,
+          "2": 1
+        }
+      },
+      "after": {
+        "i": 2,
+        "v": 2,
+        "nums[i]": 4,
+        "d": {
+          "3": 0,
+          "2": 1
+        }
+      },
+      "diff": [],
+      "notes": "Complement found! The pair is at indices 1 and 2"
+    },
+    {
+      "step": 13,
+      "line": 8,
+      "event": "Return tuple (1, 2)",
+      "before": {
+        "i": 2,
+        "v": 2,
+        "nums[i]": 4,
+        "d": {
+          "3": 0,
+          "2": 1
+        }
+      },
+      "after": {
+        "i": 2,
+        "v": 2,
+        "nums[i]": 4,
+        "d": {
+          "3": 0,
+          "2": 1
+        }
+      },
+      "diff": [],
+      "notes": "BUG: Returns tuple (1,2) instead of list [1,2]"
+    }
+  ],
+  "checkpoints": [
+    {
+      "name": "After i=0 iteration",
+      "step": 5,
+      "expected": {
+        "d": {
+          "3": 0
+        }
+      },
+      "actual": {
+        "d": {
+          "3": 0
+        }
+      },
+      "status": "pass"
+    },
+    {
+      "name": "After i=1 iteration",
+      "step": 9,
+      "expected": {
+        "d": {
+          "3": 0,
+          "2": 1
+        }
+      },
+      "actual": {
+        "d": {
+          "3": 0,
+          "2": 1
+        }
+      },
+      "status": "pass"
+    },
+    {
+      "name": "Found complement",
+      "step": 12,
+      "expected": true,
+      "actual": true,
+      "status": "pass"
+    },
+    {
+      "name": "Final return value",
+      "step": 13,
+      "expected": [1, 2],
+      "actual": "(1, 2)",
+      "status": "fail"
+    }
+  ],
+  "mermaid": {
+    "flowchart": "flowchart TD\n    Start[\"Start twoSum · L3\"]\n    InitDict[\"Initialize empty dict d · L4\"]\n    LoopStart[\"For i in range len nums · L5\"]\n    CalcV[\"Calculate v = target - nums at i · L6\"]\n    CheckV{\"Is v in d? · L7\"}\n    ReturnTuple[\"Return d at v comma i as tuple · L8\"]\n    StoreInDict[\"Store nums at i maps to i in d · L11\"]\n    LoopEnd[\"Continue loop · L5\"]\n    End[\"End\"]\n    \n    Start --> InitDict\n    InitDict --> LoopStart\n    LoopStart --> CalcV\n    CalcV --> CheckV\n    CheckV -->|Yes| ReturnTuple\n    CheckV -->|No| StoreInDict\n    StoreInDict --> LoopEnd\n    LoopEnd --> CalcV\n    ReturnTuple --> End\n    \n    style ReturnTuple fill:#7f1d1d,stroke:#ef4444,color:#fecaca"
+  },
+  "execution_path": [
+    {
+      "node_id": "Start",
+      "event": "Function twoSum called",
+      "line": 3,
+      "state": {
+        "nums": "[3,2,4]",
+        "target": "6"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "InitDict",
+      "event": "Initialize empty dictionary",
+      "line": 4,
+      "state": {
+        "d": "{}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "LoopStart",
+      "event": "Loop iteration i=0",
+      "line": 5,
+      "state": {
+        "i": "0",
+        "d": "{}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "CalcV",
+      "event": "Calculate v=3, nums[0]=3",
+      "line": 6,
+      "state": {
+        "i": "0",
+        "v": "3",
+        "nums[i]": "3",
+        "d": "{}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "CheckV",
+      "event": "Check 3 in d: False",
+      "line": 7,
+      "state": {
+        "i": "0",
+        "v": "3",
+        "d": "{}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "StoreInDict",
+      "event": "Store d[3]=0",
+      "line": 11,
+      "state": {
+        "i": "0",
+        "d": "{3:0}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "LoopEnd",
+      "event": "Continue to next iteration",
+      "line": 5,
+      "state": {
+        "i": "0",
+        "d": "{3:0}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "CalcV",
+      "event": "Calculate v=4, nums[1]=2",
+      "line": 6,
+      "state": {
+        "i": "1",
+        "v": "4",
+        "nums[i]": "2",
+        "d": "{3:0}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "CheckV",
+      "event": "Check 4 in d: False",
+      "line": 7,
+      "state": {
+        "i": "1",
+        "v": "4",
+        "d": "{3:0}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "StoreInDict",
+      "event": "Store d[2]=1",
+      "line": 11,
+      "state": {
+        "i": "1",
+        "d": "{3:0,2:1}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "LoopEnd",
+      "event": "Continue to next iteration",
+      "line": 5,
+      "state": {
+        "i": "1",
+        "d": "{3:0,2:1}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "CalcV",
+      "event": "Calculate v=2, nums[2]=4",
+      "line": 6,
+      "state": {
+        "i": "2",
+        "v": "2",
+        "nums[i]": "4",
+        "d": "{3:0,2:1}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "CheckV",
+      "event": "Check 2 in d: True",
+      "line": 7,
+      "state": {
+        "i": "2",
+        "v": "2",
+        "d": "{3:0,2:1}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "ReturnTuple",
+      "event": "Return tuple instead of list",
+      "line": 8,
+      "state": {
+        "i": "2",
+        "v": "2",
+        "d[v]": "1",
+        "return": "(1,2)"
+      },
+      "highlight": "error"
+    },
+    {
+      "node_id": "End",
+      "event": "Function ends",
+      "line": 8,
+      "state": {
+        "return": "(1,2)"
+      },
+      "highlight": "error"
+    }
+  ]
+}
+```
+
+=== MERMAID FLOWCHART ===
+flowchart TD
+    Start["Start twoSum · L3"]
+    InitDict["Initialize empty dict d · L4"]
+    LoopStart["For i in range len nums · L5"]
+    CalcV["Calculate v = target - nums at i · L6"]
+    CheckV{"Is v in d? · L7"}
+    ReturnTuple["Return d at v comma i as tuple · L8"]
+    StoreInDict["Store nums at i maps to i in d · L11"]
+    LoopEnd["Continue loop · L5"]
+    End["End"]
+    
+    Start --> InitDict
+    InitDict --> LoopStart
+    LoopStart --> CalcV
+    CalcV --> CheckV
+    CheckV -->|Yes| ReturnTuple
+    CheckV -->|No| StoreInDict
+    StoreInDict --> LoopEnd
+    LoopEnd --> CalcV
+    ReturnTuple --> End
+    
+    style ReturnTuple fill:#7f1d1d,stroke:#ef4444,color:#fecaca
+
+=== EXECUTION PATH ===
+[
+  {
+    "node_id": "Start",
+    "event": "Function twoSum called",
+    "line": 3,
+    "state": {
+      "nums": "[3,2,4]",
+      "target": "6"
+    },
+    "highlight": "normal"
+  },
+  {
+    "node_id": "InitDict",
+    "event": "Initialize empty dictionary",
+    "line": 4,
+    "state": {
+      "d": "{}"
+    },
+    "highlight": "normal"
+  },
+  {
+    "node_id": "LoopStart",
+    "event": "Loop iteration i=0",
+    "line": 5,
+    "state": {
+      "i": "0",
+      "d": "{}"
+    },
+    "highlight": "normal"
+  },
+  {
+    "node_id": "CalcV",
+    "event": "Calculate v=3, nums[0]=3",
+    "line": 6,
+    "state": {
+      "i": "0",
+      "v": "3",
+      "nums[i]": "3",
+      "d": "{}"
+    },
+    "highlight": "normal"
+  },
+  {
+    "node_id": "CheckV",
+    "event": "Check 3 in d: False",
+    "line": 7,
+    "state": {
+      "i": "0",
+      "v": "3",
+      "d": "{}"
+    },
+    "highlight": "normal"
+  },
+  {
+    "node_id": "StoreInDict",
+    "event": "Store d[3]=0",
+    "line": 11,
+    "state": {
+      "i": "0",
+      "d": "{3:0}"
+    },
+    "highlight": "normal"
+  },
+  {
+    "node_id": "LoopEnd",
+    "event": "Continue to next iteration",
+    "line": 5,
+    "state": {
+      "i": "0",
+      "d": "{3:0}"
+    },
+    "highlight": "normal"
+  },
+  {
+    "node_id": "CalcV",
+    "event": "Calculate v=4, nums[1]=2",
+    "line": 6,
+    "state": {
+      "i": "1",
+      "v": "4",
+      "nums[i]": "2",
+      "d": "{3:0}"
+    },
+    "highlight": "normal"
+  },
+  {
+    "node_id": "CheckV",
+    "event": "Check 4 in d: False",
+    "line": 7,
+    "state": {
+      "i": "1",
+      "v": "4",
+      "d": "{3:0}"
+    },
+    "highlight": "normal"
+  },
+  {
+    "node_id": "StoreInDict",
+    "event": "Store d[2]=1",
+    "line": 11,
+    "state": {
+      "i": "1",
+      "d": "{3:0,2:1}"
+    },
+    "highlight": "normal"
+  },
+  {
+    "node_id": "LoopEnd",
+    "event": "Continue to next iteration",
+    "line": 5,
+    "state": {
+      "i": "1",
+      "d": "{3:0,2:1}"
+    },
+    "highlight": "normal"
+  },
+  {
+    "node_id": "CalcV",
+    "event": "Calculate v=2, nums[2]=4",
+    "line": 6,
+    "state": {
+      "i": "2",
+      "v": "2",
+      "nums[i]": "4",
+      "d": "{3:0,2:1}"
+    },
+    "highlight": "normal"
+  },
+  {
+    "node_id": "CheckV",
+    "event": "Check 2 in d: True",
+    "line": 7,
+    "state": {
+      "i": "2",
+      "v": "2",
+      "d": "{3:0,2:1}"
+    },
+    "highlight": "normal"
+  },
+  {
+    "node_id": "ReturnTuple",
+    "event": "Return tuple instead of list",
+    "line": 8,
+    "state": {
+      "i": "2",
+      "v": "2",
+      "d[v]": "1",
+      "return": "(1,2)"
+    },
+    "highlight": "error"
+  },
+  {
+    "node_id": "End",
+    "event": "Function ends",
+    "line": 8,
+    "state": {
+      "return": "(1,2)"
+    },
+    "highlight": "error"
+  }
+]
+
+=== FULL VISUALIZATION ===
+{
+  "summary": {
+    "bug_location": {
+      "line": 8,
+      "reason": "Returns a tuple (d[v], i) instead of a list [d[v], i], causing type mismatch"
+    },
+    "first_divergence_step": 6,
+    "high_level_cause": "The function returns a tuple instead of a list as required by the return type annotation."
+  },
+  "assumptions": [
+    "The input nums is [3,2,4] and target is 6",
+    "List indexing is 0-based",
+    "The problem requires returning a list of two indices",
+    "Dictionary lookup and insertion are O(1) operations"
+  ],
+  "tracked": [
+    "i",
+    "nums[i]",
+    "v",
+    "d"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "line": 4,
+      "event": "Initialize empty dictionary d",
+      "before": {},
+      "after": {
+        "d": {}
+      },
+      "diff": [
+        {
+          "field": "d",
+          "from": "undefined",
+          "to": {},
+          "impact": "Dictionary created to store value-to-index mapping"
+        }
+      ],
+      "notes": "Starting the two-sum algorithm with hash map approach"
+    },
+    {
+      "step": 2,
+      "line": 5,
+      "event": "Loop starts, i=0",
+      "before": {
+        "d": {}
+      },
+      "after": {
+        "i": 0,
+        "d": {}
+      },
+      "diff": [
+        {
+          "field": "i",
+          "from": "undefined",
+          "to": 0,
+          "impact": "First iteration begins"
+        }
+      ],
+      "notes": "Iterating through nums array"
+    },
+    {
+      "step": 3,
+      "line": 6,
+      "event": "Calculate v=6-3=3, nums[0]=3",
+      "before": {
+        "i": 0,
+        "d": {}
+      },
+      "after": {
+        "i": 0,
+        "v": 3,
+        "nums[i]": 3,
+        "d": {}
+      },
+      "diff": [
+        {
+          "field": "v",
+          "from": "undefined",
+          "to": 3,
+          "impact": "Complement value calculated"
+        }
+      ],
+      "notes": "Computing the complement needed to reach target"
+    },
+    {
+      "step": 4,
+      "line": 7,
+      "event": "Check if 3 in d: False",
+      "before": {
+        "i": 0,
+        "v": 3,
+        "nums[i]": 3,
+        "d": {}
+      },
+      "after": {
+        "i": 0,
+        "v": 3,
+        "nums[i]": 3,
+        "d": {}
+      },
+      "diff": [],
+      "notes": "Complement not found in dictionary, proceeding to else branch"
+    },
+    {
+      "step": 5,
+      "line": 11,
+      "event": "Store d[3]=0",
+      "before": {
+        "i": 0,
+        "v": 3,
+        "nums[i]": 3,
+        "d": {}
+      },
+      "after": {
+        "i": 0,
+        "v": 3,
+        "nums[i]": 3,
+        "d": {
+          "3": 0
+        }
+      },
+      "diff": [
+        {
+          "field": "d",
+          "from": {},
+          "to": {
+            "3": 0
+          },
+          "impact": "Stored mapping from value 3 to index 0"
+        }
+      ],
+      "notes": "Adding current element to hash map"
+    },
+    {
+      "step": 6,
+      "line": 5,
+      "event": "Loop continues, i=1",
+      "before": {
+        "i": 0,
+        "v": 3,
+        "nums[i]": 3,
+        "d": {
+          "3": 0
+        }
+      },
+      "after": {
+        "i": 1,
+        "d": {
+          "3": 0
+        }
+      },
+      "diff": [
+        {
+          "field": "i",
+          "from": 0,
+          "to": 1,
+          "impact": "Moving to next element"
+        }
+      ],
+      "notes": "Second iteration"
+    },
+    {
+      "step": 7,
+      "line": 6,
+      "event": "Calculate v=6-2=4, nums[1]=2",
+      "before": {
+        "i": 1,
+        "d": {
+          "3": 0
+        }
+      },
+      "after": {
+        "i": 1,
+        "v": 4,
+        "nums[i]": 2,
+        "d": {
+          "3": 0
+        }
+      },
+      "diff": [
+        {
+          "field": "v",
+          "from": 3,
+          "to": 4,
+          "impact": "New complement calculated"
+        },
+        {
+          "field": "nums[i]",
+          "from": 3,
+          "to": 2,
+          "impact": "Current element is 2"
+        }
+      ],
+      "notes": "Computing complement for nums[1]=2"
+    },
+    {
+      "step": 8,
+      "line": 7,
+      "event": "Check if 4 in d: False",
+      "before": {
+        "i": 1,
+        "v": 4,
+        "nums[i]": 2,
+        "d": {
+          "3": 0
+        }
+      },
+      "after": {
+        "i": 1,
+        "v": 4,
+        "nums[i]": 2,
+        "d": {
+          "3": 0
+        }
+      },
+      "diff": [],
+      "notes": "Complement 4 not in dictionary yet"
+    },
+    {
+      "step": 9,
+      "line": 11,
+      "event": "Store d[2]=1",
+      "before": {
+        "i": 1,
+        "v": 4,
+        "nums[i]": 2,
+        "d": {
+          "3": 0
+        }
+      },
+      "after": {
+        "i": 1,
+        "v": 4,
+        "nums[i]": 2,
+        "d": {
+          "2": 1,
+          "3": 0
+        }
+      },
+      "diff": [
+        {
+          "field": "d",
+          "from": {
+            "3": 0
+          },
+          "to": {
+            "2": 1,
+            "3": 0
+          },
+          "impact": "Stored mapping from value 2 to index 1"
+        }
+      ],
+      "notes": "Adding second element to hash map"
+    },
+    {
+      "step": 10,
+      "line": 5,
+      "event": "Loop continues, i=2",
+      "before": {
+        "i": 1,
+        "v": 4,
+        "nums[i]": 2,
+        "d": {
+          "2": 1,
+          "3": 0
+        }
+      },
+      "after": {
+        "i": 2,
+        "d": {
+          "2": 1,
+          "3": 0
+        }
+      },
+      "diff": [
+        {
+          "field": "i",
+          "from": 1,
+          "to": 2,
+          "impact": "Moving to third element"
+        }
+      ],
+      "notes": "Third iteration"
+    },
+    {
+      "step": 11,
+      "line": 6,
+      "event": "Calculate v=6-4=2, nums[2]=4",
+      "before": {
+        "i": 2,
+        "d": {
+          "2": 1,
+          "3": 0
+        }
+      },
+      "after": {
+        "i": 2,
+        "v": 2,
+        "nums[i]": 4,
+        "d": {
+          "2": 1,
+          "3": 0
+        }
+      },
+      "diff": [
+        {
+          "field": "v",
+          "from": 4,
+          "to": 2,
+          "impact": "New complement calculated"
+        },
+        {
+          "field": "nums[i]",
+          "from": 2,
+          "to": 4,
+          "impact": "Current element is 4"
+        }
+      ],
+      "notes": "Computing complement for nums[2]=4"
+    },
+    {
+      "step": 12,
+      "line": 7,
+      "event": "Check if 2 in d: True",
+      "before": {
+        "i": 2,
+        "v": 2,
+        "nums[i]": 4,
+        "d": {
+          "2": 1,
+          "3": 0
+        }
+      },
+      "after": {
+        "i": 2,
+        "v": 2,
+        "nums[i]": 4,
+        "d": {
+          "2": 1,
+          "3": 0
+        }
+      },
+      "diff": [],
+      "notes": "Complement found! The pair is at indices 1 and 2"
+    },
+    {
+      "step": 13,
+      "line": 8,
+      "event": "Return tuple (1, 2)",
+      "before": {
+        "i": 2,
+        "v": 2,
+        "nums[i]": 4,
+        "d": {
+          "2": 1,
+          "3": 0
+        }
+      },
+      "after": {
+        "i": 2,
+        "v": 2,
+        "nums[i]": 4,
+        "d": {
+          "2": 1,
+          "3": 0
+        }
+      },
+      "diff": [],
+      "notes": "BUG: Returns tuple (1,2) instead of list [1,2]"
+    }
+  ],
+  "checkpoints": [
+    {
+      "name": "After i=0 iteration",
+      "step": 5,
+      "expected": {
+        "d": {
+          "3": 0
+        }
+      },
+      "actual": {
+        "d": {
+          "3": 0
+        }
+      },
+      "status": "pass"
+    },
+    {
+      "name": "After i=1 iteration",
+      "step": 9,
+      "expected": {
+        "d": {
+          "2": 1,
+          "3": 0
+        }
+      },
+      "actual": {
+        "d": {
+          "2": 1,
+          "3": 0
+        }
+      },
+      "status": "pass"
+    },
+    {
+      "name": "Found complement",
+      "step": 12,
+      "expected": true,
+      "actual": true,
+      "status": "pass"
+    },
+    {
+      "name": "Final return value",
+      "step": 13,
+      "expected": [
+        1,
+        2
+      ],
+      "actual": "(1, 2)",
+      "status": "fail"
+    }
+  ],
+  "mermaid": {
+    "flowchart": "flowchart TD\n    Start[\"Start twoSum · L3\"]\n    InitDict[\"Initialize empty dict d · L4\"]\n    LoopStart[\"For i in range len nums · L5\"]\n    CalcV[\"Calculate v = target - nums at i · L6\"]\n    CheckV{\"Is v in d? · L7\"}\n    ReturnTuple[\"Return d at v comma i as tuple · L8\"]\n    StoreInDict[\"Store nums at i maps to i in d · L11\"]\n    LoopEnd[\"Continue loop · L5\"]\n    End[\"End\"]\n    \n    Start --> InitDict\n    InitDict --> LoopStart\n    LoopStart --> CalcV\n    CalcV --> CheckV\n    CheckV -->|Yes| ReturnTuple\n    CheckV -->|No| StoreInDict\n    StoreInDict --> LoopEnd\n    LoopEnd --> CalcV\n    ReturnTuple --> End\n    \n    style ReturnTuple fill:#7f1d1d,stroke:#ef4444,color:#fecaca"
+  },
+  "execution_path": [
+    {
+      "node_id": "Start",
+      "event": "Function twoSum called",
+      "line": 3,
+      "state": {
+        "nums": "[3,2,4]",
+        "target": "6"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "InitDict",
+      "event": "Initialize empty dictionary",
+      "line": 4,
+      "state": {
+        "d": "{}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "LoopStart",
+      "event": "Loop iteration i=0",
+      "line": 5,
+      "state": {
+        "i": "0",
+        "d": "{}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "CalcV",
+      "event": "Calculate v=3, nums[0]=3",
+      "line": 6,
+      "state": {
+        "i": "0",
+        "v": "3",
+        "nums[i]": "3",
+        "d": "{}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "CheckV",
+      "event": "Check 3 in d: False",
+      "line": 7,
+      "state": {
+        "i": "0",
+        "v": "3",
+        "d": "{}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "StoreInDict",
+      "event": "Store d[3]=0",
+      "line": 11,
+      "state": {
+        "i": "0",
+        "d": "{3:0}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "LoopEnd",
+      "event": "Continue to next iteration",
+      "line": 5,
+      "state": {
+        "i": "0",
+        "d": "{3:0}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "CalcV",
+      "event": "Calculate v=4, nums[1]=2",
+      "line": 6,
+      "state": {
+        "i": "1",
+        "v": "4",
+        "nums[i]": "2",
+        "d": "{3:0}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "CheckV",
+      "event": "Check 4 in d: False",
+      "line": 7,
+      "state": {
+        "i": "1",
+        "v": "4",
+        "d": "{3:0}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "StoreInDict",
+      "event": "Store d[2]=1",
+      "line": 11,
+      "state": {
+        "i": "1",
+        "d": "{3:0,2:1}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "LoopEnd",
+      "event": "Continue to next iteration",
+      "line": 5,
+      "state": {
+        "i": "1",
+        "d": "{3:0,2:1}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "CalcV",
+      "event": "Calculate v=2, nums[2]=4",
+      "line": 6,
+      "state": {
+        "i": "2",
+        "v": "2",
+        "nums[i]": "4",
+        "d": "{3:0,2:1}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "CheckV",
+      "event": "Check 2 in d: True",
+      "line": 7,
+      "state": {
+        "i": "2",
+        "v": "2",
+        "d": "{3:0,2:1}"
+      },
+      "highlight": "normal"
+    },
+    {
+      "node_id": "ReturnTuple",
+      "event": "Return tuple instead of list",
+      "line": 8,
+      "state": {
+        "i": "2",
+        "v": "2",
+        "d[v]": "1",
+        "return": "(1,2)"
+      },
+      "highlight": "error"
+    },
+    {
+      "node_id": "End",
+      "event": "Function ends",
+      "line": 8,
+      "state": {
+        "return": "(1,2)"
+      },
+      "highlight": "error"
+    }
+  ]
+}

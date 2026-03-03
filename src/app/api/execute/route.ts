@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
       testCases: {
         where: runHidden ? {} : { isHidden: false },
         orderBy: { orderIndex: 'asc' },
+        take: runHidden ? undefined : 3,
       },
     },
   });
@@ -76,23 +77,24 @@ export async function POST(request: NextRequest) {
       where: { userId_problemId: { userId: user.id, problemId: problem.id } },
     });
 
-    // Determine new status: only upgrade to 'solved' if all passed, never downgrade from 'solved'
-    const newStatus = allPassed ? 'solved' : (existing?.status === 'solved' ? 'solved' : 'attempted');
+    // Only mark as 'solved' on a full Submit (runHidden: true), never on a Run
+    const newStatus = runHidden && allPassed
+      ? 'solved'
+      : (existing?.status === 'solved' ? 'solved' : 'attempted');
 
-    // Always save the latest code, but preserve solved status and solvedAt if already solved
     await prisma.userProgress.upsert({
       where: { userId_problemId: { userId: user.id, problemId: problem.id } },
       update: {
         status: newStatus,
-        lastCode: code,  // Always update to latest code
-        solvedAt: allPassed ? new Date() : existing?.solvedAt ?? null,
+        lastCode: code,
+        solvedAt: runHidden && allPassed ? new Date() : existing?.solvedAt ?? null,
       },
       create: {
         userId: user.id,
         problemId: problem.id,
         status: newStatus,
         lastCode: code,
-        solvedAt: allPassed ? new Date() : null,
+        solvedAt: runHidden && allPassed ? new Date() : null,
       },
     });
 
