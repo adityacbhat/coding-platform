@@ -50,6 +50,93 @@ type HintData = {
   hints: string[];
 };
 
+type FeedbackChatMessage = { 
+  role: 'user' | 'assistant'; 
+  content: string;
+  reasoning_details?: unknown;
+};
+
+function FeedbackChatSection({
+  messages,
+  isLoading,
+  inputValue,
+  onInputChange,
+  onSend,
+  endRef,
+}: {
+  messages: FeedbackChatMessage[];
+  isLoading: boolean;
+  inputValue: string;
+  onInputChange: (v: string) => void;
+  onSend: () => void;
+  endRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  return (
+    <div className="space-y-3 mt-3">
+      {(messages.length > 0 || isLoading) && (
+        <div className="max-h-48 overflow-y-auto space-y-3 pr-2">
+        {messages.map((m, i) => (
+          <div
+            key={i}
+            className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            <div
+              className={`max-w-[85%] px-3 py-2 rounded-xl text-sm ${
+                m.role === 'user'
+                  ? 'bg-indigo-600 text-white'
+                  : 'soft-card text-slate-300 border border-slate-600'
+              }`}
+            >
+              {m.role === 'user' ? (
+                <p className="whitespace-pre-wrap">{m.content}</p>
+              ) : (
+                <div className="prose prose-invert prose-sm max-w-none">
+                  <ReactMarkdown>{m.content}</ReactMarkdown>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="soft-card px-3 py-2 rounded-xl border border-slate-600">
+              <div className="flex gap-1">
+                {[0, 1, 2].map((j) => (
+                  <div
+                    key={j}
+                    className="w-2 h-2 rounded-full bg-slate-500 animate-pulse"
+                    style={{ animationDelay: `${j * 0.2}s` }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={endRef} />
+        </div>
+      )}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(e) => onInputChange(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && onSend()}
+          placeholder="Ask a follow-up question…"
+          className="flex-1 bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+          disabled={isLoading}
+        />
+        <button
+          onClick={onSend}
+          disabled={!inputValue.trim() || isLoading}
+          className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-xl text-sm font-medium transition-colors"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function ProblemClient({ problem, savedCode, savedAlgorithm, savedAnalysis, savedResults }: Props) {
   const [code, setCode] = useState(savedCode ?? problem.starterCodePython);
   const [language, setLanguage] = useState<'python' | 'javascript'>('python');
@@ -76,6 +163,20 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
     savedAnalysis ? { analysis: savedAnalysis as unknown as AnalysisData } : null
   );
+  const [feedbackChatMessages, setFeedbackChatMessages] = useState<FeedbackChatMessage[]>([]);
+  const [feedbackChatInput, setFeedbackChatInput] = useState('');
+  const [isFeedbackChatLoading, setIsFeedbackChatLoading] = useState(false);
+  const feedbackChatEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollFeedbackChatToBottom = useCallback(() => {
+    feedbackChatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  useEffect(() => {
+    if (feedbackChatMessages.length > 0 || isFeedbackChatLoading) {
+      scrollFeedbackChatToBottom();
+    }
+  }, [feedbackChatMessages, isFeedbackChatLoading, scrollFeedbackChatToBottom]);
 
   const handleLanguageChange = (lang: 'python' | 'javascript') => {
     setLanguage(lang);
@@ -150,6 +251,7 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
   const analyzeCode = async () => {
     setIsAnalyzing(true);
     setAnalysisResult(null);
+    setFeedbackChatMessages([]);
     setAnalysisSource('code');
 
     const response = await fetch('/api/analyze', {
@@ -171,6 +273,7 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
   const analyzeAlgorithm = async () => {
     setIsAnalyzingAlgorithm(true);
     setAnalysisResult(null);
+    setFeedbackChatMessages([]);
     setAnalysisSource('algorithm');
 
     const response = await fetch('/api/analyze-algorithm', {
@@ -182,6 +285,45 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
     const data = await response.json();
     setAnalysisResult(data);
     setIsAnalyzingAlgorithm(false);
+  };
+
+  const sendFeedbackChatMessage = async () => {
+    const msg = feedbackChatInput.trim();
+    if (!msg || !analysisResult || isFeedbackChatLoading) return;
+
+    setFeedbackChatInput('');
+    const userMsg: FeedbackChatMessage = { role: 'user', content: msg };
+    setFeedbackChatMessages((prev) => [...prev, userMsg]);
+    setIsFeedbackChatLoading(true);
+
+    const response = await fetch('/api/feedback-chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        problemSlug: problem.slug,
+        analysisSource,
+        analysis: analysisResult.analysis,
+        code: analysisSource === 'code' ? code : undefined,
+        algorithm: analysisSource === 'algorithm' ? algorithmText : undefined,
+        language: analysisSource === 'code' ? language : undefined,
+        messages: feedbackChatMessages,
+        userMessage: msg,
+      }),
+    });
+
+    const data = await response.json();
+    setIsFeedbackChatLoading(false);
+
+    if (data.error) {
+      setFeedbackChatMessages((prev) => prev.slice(0, -1));
+      return;
+    }
+
+    setFeedbackChatMessages((prev) => [...prev, { 
+      role: 'assistant', 
+      content: data.reply,
+      reasoning_details: data.reasoning_details
+    }]);
   };
 
   const getHint = async () => {
@@ -996,6 +1138,15 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
                         </ul>
                       </div>
                     )}
+
+                    <FeedbackChatSection
+                      messages={feedbackChatMessages}
+                      isLoading={isFeedbackChatLoading}
+                      inputValue={feedbackChatInput}
+                      onInputChange={setFeedbackChatInput}
+                      onSend={sendFeedbackChatMessage}
+                      endRef={feedbackChatEndRef}
+                    />
                   </>
                 );
               })()}
@@ -1064,6 +1215,15 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
                       </div>
                       <p className="text-slate-300 text-sm leading-relaxed">{codeAnalysis.feedback}</p>
                     </div>
+
+                    <FeedbackChatSection
+                      messages={feedbackChatMessages}
+                      isLoading={isFeedbackChatLoading}
+                      inputValue={feedbackChatInput}
+                      onInputChange={setFeedbackChatInput}
+                      onSend={sendFeedbackChatMessage}
+                      endRef={feedbackChatEndRef}
+                    />
                   </>
                 );
               })()}
