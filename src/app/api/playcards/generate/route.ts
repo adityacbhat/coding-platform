@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
 import { prisma } from '@/lib/db';
 import { createClient } from '@/lib/supabase/server';
 
-const anthropic = new Anthropic();
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+
+type OpenRouterResponse = {
+  choices: Array<{
+    message: {
+      content: string;
+    };
+  }>;
+};
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -52,18 +59,26 @@ Rules for "back":
 - Lines 7+: 3–4 numbered steps max. Each step is one short sentence (under 10 words). No pseudocode, no code — pure English. Omit obvious setup steps; only the key insight steps.
 - Final line blank, then: Link: ${problemUrl}`;
 
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: 600,
-    messages: [{ role: 'user', content: prompt }],
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "arcee-ai/trinity-mini:free",
+      messages: [{ role: "user", content: prompt }],
+      reasoning: { enabled: true }
+    })
   });
 
-  const content = message.content[0];
-  if (content.type !== 'text') {
+  const result = await response.json() as OpenRouterResponse;
+
+  if (!result.choices || !result.choices[0]?.message) {
     return NextResponse.json({ error: 'Unexpected AI response' }, { status: 500 });
   }
 
-  const raw = content.text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  const raw = result.choices[0].message.content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
   const { front, back } = JSON.parse(raw) as { front: string; back: string };
 
   await prisma.user.upsert({

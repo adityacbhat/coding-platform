@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
 import { prisma } from '@/lib/db';
 
-const client = new Anthropic();
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+
+type OpenRouterResponse = {
+  choices: Array<{
+    message: {
+      content: string;
+    };
+  }>;
+};
 
 export type HintData = {
   hints: string[];
@@ -58,19 +65,26 @@ Reply with ONLY a raw JSON object, no markdown, no code fences:
   ]
 }`;
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: 512,
-    messages: [{ role: 'user', content: prompt }],
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "arcee-ai/trinity-mini:free",
+      messages: [{ role: "user", content: prompt }],
+      reasoning: { enabled: true }
+    })
   });
 
-  const content = message.content[0];
+  const result = await response.json() as OpenRouterResponse;
 
-  if (content.type !== 'text') {
+  if (!result.choices || !result.choices[0]?.message) {
     return NextResponse.json({ error: 'Unexpected response from AI' }, { status: 500 });
   }
 
-  const rawText = content.text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  const rawText = result.choices[0].message.content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
   const hint: HintData = JSON.parse(rawText);
 
   return NextResponse.json({ hint });

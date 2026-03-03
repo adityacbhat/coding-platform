@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
 import { prisma } from '@/lib/db';
 import { createClient } from '@/lib/supabase/server';
+
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+
+type OpenRouterResponse = {
+  choices: Array<{
+    message: {
+      content: string;
+    };
+  }>;
+};
 
 export type AlgorithmAnalysisData = {
   onTrack: boolean;
   validationMessage: string;
   hints: string[];
 };
-
-const client = new Anthropic();
 
 export async function POST(request: NextRequest) {
   const { algorithm, problemSlug } = await request.json();
@@ -43,19 +50,26 @@ Reply with ONLY a raw JSON object — no markdown, no code fences, no extra text
   "hints": ["Optional hint 1", "Optional hint 2"] — only include hints if they need guidance. If fully on track, can be empty array or 1 small tip. Max 3 hints, each one short sentence.
 }`;
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: 1024,
-    messages: [{ role: 'user', content: prompt }],
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "arcee-ai/trinity-mini:free",
+      messages: [{ role: "user", content: prompt }],
+      reasoning: { enabled: true }
+    })
   });
 
-  const content = message.content[0];
+  const result = await response.json() as OpenRouterResponse;
 
-  if (content.type !== 'text') {
+  if (!result.choices || !result.choices[0]?.message) {
     return NextResponse.json({ error: 'Unexpected response from AI' }, { status: 500 });
   }
 
-  const rawText = content.text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  const rawText = result.choices[0].message.content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
   const analysis: AlgorithmAnalysisData = JSON.parse(rawText);
 
   const supabase = await createClient();
