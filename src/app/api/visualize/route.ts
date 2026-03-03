@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
 import { jsonrepair } from 'jsonrepair';
 import { prisma } from '@/lib/db';
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-
-type OpenRouterResponse = {
-  choices: Array<{
-    message: {
-      content: string;
-    };
-  }>;
-};
+const client = new Anthropic();
 
 export type BugLocation = { line: number; reason: string };
 
@@ -185,34 +178,27 @@ Final sanity checks you MUST do before responding:
 - Ensure mermaid node IDs match execution_path node_id values exactly.
 `;
 
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "arcee-ai/trinity-mini:free",
-      messages: [{ role: "user", content: prompt }],
-      reasoning: { enabled: true }
-    })
+  const stream = await client.messages.stream({
+    model: 'claude-sonnet-4-5',
+    max_tokens: 32000,
+    messages: [{ role: 'user', content: prompt }],
   });
 
-  const result = await response.json() as OpenRouterResponse;
+  const message = await stream.finalMessage();
+  const content = message.content[0];
 
-  if (!result.choices || !result.choices[0]?.message) {
+  if (content.type !== 'text') {
     return NextResponse.json({ error: 'Unexpected response from AI' }, { status: 500 });
   }
 
-  const contentText = result.choices[0].message.content;
-  const rawText = contentText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  const rawText = content.text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
 
   const visualization: VisualizationData = JSON.parse(jsonrepair(rawText));
 
   // Write debug output to file
   const fs = await import('fs');
   const debugOutput = `=== RAW LLM OUTPUT ===
-${contentText}
+${content.text}
 
 === MERMAID FLOWCHART ===
 ${visualization.mermaid.flowchart}

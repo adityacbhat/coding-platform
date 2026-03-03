@@ -764,6 +764,9 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
                                 </svg>
                                 Visualize
                               </button>
+                              <p className="text-[10px] text-slate-400 italic">
+                                Takes longer & uses more tokens. Choose the test case you most want to understand.
+                              </p>
                               {vizErrors[result.testCaseId] && (
                                 <p className="text-xs text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl">
                                   {vizErrors[result.testCaseId]}
