@@ -44,3 +44,5 @@ next-env.d.ts
 
 # scraped data (generated)
 /scripts/data/*.json
+
+llm-debug-output.txt

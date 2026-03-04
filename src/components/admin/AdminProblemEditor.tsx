@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 type TestCaseRow = {
@@ -478,6 +478,9 @@ function NewTestCaseForm({ problemId, onCreated }: { problemId: number; onCreate
 }
 
 export default function AdminProblemEditor({ problem, allConcepts, allCompanies }: AdminProblemEditorProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const [form, setForm] = useState({
     title: problem.title,
     slug: problem.slug,
@@ -533,6 +536,10 @@ export default function AdminProblemEditor({ problem, allConcepts, allCompanies 
     'w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-200 focus:outline-none focus:border-violet-500 placeholder:text-slate-600';
 
   const section = 'soft-card rounded-2xl border border-slate-700 p-5 space-y-4';
+
+  if (!mounted) {
+    return <div className="max-w-5xl mx-auto h-96 rounded-2xl bg-slate-800/30 animate-pulse" />;
+  }
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">

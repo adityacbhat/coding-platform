@@ -16,14 +16,15 @@ function createPrismaClient() {
   }
   
   if (!globalForPrisma.pool) {
-    globalForPrisma.pool = new Pool({ 
+    globalForPrisma.pool = new Pool({
       connectionString,
-      ssl: connectionString?.includes('supabase') || connectionString?.includes('pooler') 
-        ? { rejectUnauthorized: false } 
+      ssl: connectionString?.includes('supabase') || connectionString?.includes('pooler')
+        ? { rejectUnauthorized: false }
         : false,
-      max: 3,
-      idleTimeoutMillis: 30000,
+      max: 1,
+      idleTimeoutMillis: 10000,
       connectionTimeoutMillis: 10000,
+      allowExitOnIdle: true,
     });
   }
   
