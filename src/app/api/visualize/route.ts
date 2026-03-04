@@ -5,8 +5,6 @@ import { prisma } from '@/lib/db';
 
 const client = new Anthropic();
 
-export type BugLocation = { line: number; reason: string };
-
 export type StepDiff = {
   field: string;
   from: unknown;
@@ -37,16 +35,11 @@ export type ExecutionFrame = {
   event: string;
   line: number;
   state: Record<string, string>;
-  highlight: 'normal' | 'error' | 'success';
+  highlight: 'normal' | 'success';
+  comparing: string[];
 };
 
 export type VisualizationData = {
-  summary: {
-    bug_location: BugLocation;
-    first_divergence_step: number;
-    high_level_cause: string;
-  };
-  assumptions: string[];
   tracked: string[];
   steps: TraceStep[];
   checkpoints: Checkpoint[];
@@ -59,6 +52,14 @@ export type VisualizationData = {
 export async function POST(request: NextRequest) {
   const { code, language, problemSlug, input, expectedOutput } = await request.json();
 
+  // Strip blank lines so AI line numbers exactly match what the viewer displays
+  const strippedLines = (code as string).split('\n').filter((l: string) => l.trim() !== '');
+  const strippedCode  = strippedLines.join('\n');
+
+  // Prefix every line with its 1-indexed number so the AI can never miscount
+  // (e.g. it sometimes skips `class Solution:` as line 1 without explicit numbering)
+  const numberedCode = strippedLines.map((l, i) => `${i + 1}: ${l}`).join('\n');
+
   const problem = await prisma.problem.findUnique({
     where: { slug: problemSlug },
     select: { title: true, description: true },
@@ -68,15 +69,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Problem not found' }, { status: 404 });
   }
 
-  const prompt = `You are a "Debug Visualizer" that outputs ONLY machine-checkable JSON artifacts, not prose.
+  const prompt = `You are a "Execution Visualizer" that outputs ONLY machine-checkable JSON artifacts, not prose.
 
 Context:
 Problem: ${problem.title}
 ${problem.description}
 
-Student code (${language}):
+Student code (${language}) — line numbers are shown explicitly, use them exactly:
 \`\`\`${language}
-${code}
+${numberedCode}
 \`\`\`
 
 Single test case:
@@ -84,73 +85,48 @@ Single test case:
 - Expected output: ${JSON.stringify(expectedOutput)}
 
 Goal:
-Produce a step-by-step execution trace, a Mermaid flowchart, and an execution_path for THIS exact input that make the bug visually obvious.
+Produce a complete step-by-step execution trace, a Mermaid flowchart, and an execution_path for THIS exact input.
 
 ABSOLUTE REQUIREMENTS (read carefully):
 1) Mechanical simulation only:
-   - Simulate the code like a debugger would: evaluate every condition using the current concrete values.
-   - Never "assume" loop behavior. Never jump values. Never compress unless explicitly using the loop summarization rule below.
+   - Simulate the code like a debugger: evaluate every condition using the current concrete values.
+   - Never assume loop behavior. Never skip or summarize steps.
 
 2) Consistency across artifacts:
    - The final returned value implied by the trace MUST match the final "actual" value in checkpoints.
    - execution_path state MUST be consistent with steps (same variable values at same moment).
    - Node IDs in execution_path MUST exist in the Mermaid flowchart.
-   - Line numbers are 1-indexed lines of the student's code block above.
+   - Line numbers: use EXACTLY the numbers prefixed on each line in the code block above (e.g. if the line reads "5: while j<len(nums):", its line number is 5). Never derive line numbers yourself — read them directly from the prefix.
 
 3) What to trace:
    - Track only 2–4 core variables/structures that drive the result.
-   - ALSO track any derived/indexed values used in comparisons or indexing (example: if comparing s[i] and s[j], include s[i] and s[j] in tracked and in state).
+   - ALSO track any derived/indexed values used in comparisons or indexing (e.g. if comparing nums[i] and nums[j], include those as separate tracked entries).
 
 4) Steps:
-   - Each trace step = one meaningful operation (one condition check, one compare, one pointer update, one longest update, one return).
+   - Each trace step = one meaningful operation (one condition check, one assignment, one pointer update, one return).
    - event must be 10 words or fewer.
-   - Show ALL iterations of the loop - do NOT skip or summarize any steps.
-   - Include every single step from start to finish.
-
-5) Divergence definition:
-   - first_divergence_step is the earliest step where the algorithm's behavior becomes incorrect relative to the problem's intended semantics.
-   - If the student's output differs from expectedOutput, there MUST be a divergence step (not -1).
-   - The frame in execution_path with highlight="error" MUST correspond to that divergence point.
+   - Show ALL iterations — do NOT skip or summarize any steps.
 
 Mermaid flowchart rules (CRITICAL — every violation causes render failure):
 - Start with exactly: flowchart TD
 - Node IDs: simple alphanumeric only (A, B, loopCheck, step1). No spaces, hyphens, punctuation.
-- ALWAYS wrap every node label in double quotes:
-  - A["label"], B{"label"}, C("label")
-- Never place any of these characters INSIDE label text (they break Mermaid parsing):
-  square brackets, curly braces, pipe, angle brackets, double quote, hash, ampersand, semicolon
-  Rephrase labels to avoid them entirely.
-- Edges: use --> and optional labels with |text| on the arrow: A -->|Yes| B
-- Use as many nodes as needed to represent the algorithm clearly.
-- Show key decisions and the divergence point.
-- Mark the error node with:
-  style errorNodeId fill:#7f1d1d,stroke:#ef4444,color:#fecaca
+- ALWAYS wrap every node label in double quotes: A["label"], B{"label"}, C("label")
+- Never place any of these characters INSIDE label text: square brackets, curly braces, pipe, angle brackets, double quote, hash, ampersand, semicolon. Rephrase to avoid them.
+- Edges: use --> with optional labels: A -->|Yes| B
 - Each node label MUST end with a line reference: " · L{n}"
 
 execution_path rules:
-- This is the ordered sequence of nodes actually visited for THIS input.
-- Include ALL repeated visits in order (loops revisit nodes). Show the COMPLETE execution path.
-- event must be 10 words or fewer.
-- line: the line number executed at that node (1-indexed in student's code).
-- state: current values of tracked variables as short strings.
-  Include both direct variables and derived values used at that moment.
-- highlight:
-  - "normal" for regular steps,
-  - "error" for the first divergence moment,
-  - "success" only if there is no divergence (test truly passes).
-- Show ALL frames - do NOT skip or summarize any frames.
-- The execution_path must match the steps array - every step should have a corresponding frame.
+- Ordered sequence of ALL nodes visited for THIS input, including repeated loop visits.
+- event: 10 words or fewer.
+- line: read directly from the numbered prefix in the code block.
+- state: MUST contain EVERY variable in "tracked" at EVERY frame. Carry forward unchanged values — never omit a tracked variable from any frame.
+- highlight: use "normal" for all steps; use "success" only when the test truly passes (actual === expected).
+- comparing: list the tracked variable keys from state that are actively being evaluated in a condition check (if/while/elif/for). Use the EXACT same key strings as in state. Use [] for non-condition steps (assignments, swaps, returns).
 
 Output format:
-Return ONLY raw JSON (no markdown fences, no extra text) that conforms EXACTLY to this schema:
+Return ONLY raw JSON (no markdown fences, no extra text) matching this schema exactly:
 
 {
-  "summary": {
-    "bug_location": {"line": <int or 0>, "reason": "<why this line is wrong>"},
-    "first_divergence_step": <int, -1 if none>,
-    "high_level_cause": "<one sentence, no code>"
-  },
-  "assumptions": ["<string>"],
   "tracked": ["<var>"],
   "steps": [
     {
@@ -167,14 +143,18 @@ Return ONLY raw JSON (no markdown fences, no extra text) that conforms EXACTLY t
     "flowchart": "<Mermaid flowchart TD string>"
   },
   "execution_path": [
-    {"node_id": "<str>", "event": "<str>", "line": <int>, "state": {"<var>": "<str>"}, "highlight": "normal"|"error"|"success"}
+    {
+      "node_id": "<str>", "event": "<str>", "line": <int>,
+      "state": {"<var>": "<str>"},
+      "highlight": "normal"|"success",
+      "comparing": ["<var>"]
+    }
   ]
 }
 
-Final sanity checks you MUST do before responding:
-- Compute the student's actual return value from your simulation and place it in checkpoints final "actual".
-- Ensure checkpoints final status matches comparison of actual vs expectedOutput.
-- Ensure the trace includes the moment longest reaches its final value (if it changes).
+Final checks before responding:
+- Compute the actual return value from your simulation and place it in checkpoints final "actual".
+- Ensure checkpoints final status correctly reflects actual vs expectedOutput.
 - Ensure mermaid node IDs match execution_path node_id values exactly.
 `;
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { sanitizeMermaid } from '@/lib/mermaid-sanitize';
 import type { ExecutionFrame } from '@/app/api/visualize/route';
@@ -15,12 +15,10 @@ type Props = {
 
 const FRAME_FILL: Record<ExecutionFrame['highlight'], string> = {
   normal:  '#0c4a6e',  // sky-900
-  error:   '#78350f',  // amber-900
   success: '#14532d',  // green-900
 };
 const FRAME_STROKE: Record<ExecutionFrame['highlight'], string> = {
   normal:  '#38bdf8',  // sky-400
-  error:   '#fbbf24',  // amber-400
   success: '#4ade80',  // green-400
 };
 const VISITED_FILL   = '#1e293b';
@@ -206,14 +204,25 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
   const next = () => setFrame((f) => Math.min(path.length - 1, f + 1));
 
   const cur = path[frame];
-  const prevFrame = frame > 0 ? path[frame - 1] : null;
 
-  // Only show state entries that changed vs previous frame
-  const stateDiffs = cur
-    ? Object.entries(cur.state).filter(
-        ([k, v]) => !prevFrame || JSON.stringify(v) !== JSON.stringify(prevFrame.state[k])
-      )
-    : [];
+  // Build cumulative state per frame: carry forward any variable not mentioned in a frame
+  // so every variable is always visible even if the AI omitted it from an intermediate frame
+  const cumulativeStates = useMemo(() =>
+    path.reduce<Array<Record<string, string>>>((acc, f, i) => {
+      acc.push(i === 0 ? { ...f.state } : { ...acc[i - 1], ...f.state });
+      return acc;
+    }, []),
+    [path]
+  );
+
+  // All variable keys that appear across any frame, sorted
+  const allVarKeys = useMemo(() =>
+    Array.from(new Set(path.flatMap(f => Object.keys(f.state)))).sort(),
+    [path]
+  );
+
+  const curState  = cumulativeStates[frame]      ?? {};
+  const prevState = cumulativeStates[frame - 1]  ?? {};
 
   // ── Render ───────────────────────────────────────────────────────────────────
   if (renderError) {
@@ -283,11 +292,7 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
               title={f.event}
               className={`rounded-full ${
                 i === frame
-                  ? `w-3 h-3 ${
-                      f.highlight === 'error'   ? 'bg-amber-400' :
-                      f.highlight === 'success' ? 'bg-emerald-400' :
-                                                  'bg-cyan-400'
-                    }`
+                  ? `w-3 h-3 ${f.highlight === 'success' ? 'bg-emerald-400' : 'bg-cyan-400'}`
                   : i < frame
                   ? 'w-2 h-2 bg-slate-600'
                   : 'w-2 h-2 bg-slate-800'
@@ -301,40 +306,47 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
       {/* Current step info */}
       {cur && (
         <div className={`rounded-xl border px-3 py-2.5 space-y-1.5 ${
-          cur.highlight === 'error'
-            ? 'bg-amber-900/20 border-amber-700/40'
-            : cur.highlight === 'success'
+          cur.highlight === 'success'
             ? 'bg-emerald-900/20 border-emerald-700/40'
             : 'bg-slate-900 border-slate-800'
         }`}>
           <p className={`text-xs font-medium ${
-            cur.highlight === 'error'   ? 'text-amber-300' :
-            cur.highlight === 'success' ? 'text-emerald-300' :
-                                          'text-slate-200'
+            cur.highlight === 'success' ? 'text-emerald-300' : 'text-slate-200'
           }`}>
             {cur.event}
           </p>
 
-          {stateDiffs.length > 0 && (
-            <div className="flex flex-wrap gap-x-4 gap-y-1">
-              {stateDiffs.slice(0, 3).map(([k, v]) => (
-                <span key={k} className="text-[11px] font-mono flex items-center gap-1">
-                  <span className="text-slate-500">{k}:</span>
-                  {prevFrame && (
-                    <>
-                      <span className="text-slate-600 line-through">{prevFrame.state[k] ?? '—'}</span>
-                      <span className="text-slate-600">→</span>
-                    </>
-                  )}
-                  <span className={
-                    cur.highlight === 'error'   ? 'text-amber-300' :
-                    cur.highlight === 'success' ? 'text-emerald-300' :
-                                                  'text-cyan-300'
-                  }>
-                    {v}
+          {allVarKeys.length > 0 && (
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-0.5">
+              {allVarKeys.map((k) => {
+                const val        = curState[k]  ?? '—';
+                const prevVal    = frame > 0 ? (prevState[k] ?? '—') : undefined;
+                const changed    = prevVal !== undefined && JSON.stringify(val) !== JSON.stringify(prevVal);
+                const comparing  = cur.comparing?.includes(k) ?? false;
+                return (
+                  <span key={k} className={`text-[11px] font-mono flex items-center gap-1 min-w-0 rounded px-1 -mx-1 ${
+                    comparing ? 'bg-sky-900/40' : ''
+                  }`}>
+                    {comparing && (
+                      <span className="text-sky-500 flex-shrink-0 text-[10px]">↔</span>
+                    )}
+                    <span className={`flex-shrink-0 ${comparing ? 'text-sky-400' : 'text-slate-500'}`}>{k}:</span>
+                    {changed && prevVal !== undefined && (
+                      <>
+                        <span className="text-slate-600 line-through truncate">{prevVal}</span>
+                        <span className="text-slate-600 flex-shrink-0">→</span>
+                      </>
+                    )}
+                    <span className={`truncate ${
+                      comparing   ? 'text-sky-200 font-semibold' :
+                      changed     ? (cur.highlight === 'success' ? 'text-emerald-300' : 'text-cyan-300') :
+                                    'text-slate-400'
+                    }`}>
+                      {val}
+                    </span>
                   </span>
-                </span>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -346,10 +358,7 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
       {/* Fullscreen modal */}
       {isExpanded && typeof document !== 'undefined' && createPortal(
         (() => {
-          // Collect ALL variable keys across all frames
-          const allVarKeys = new Set<string>();
-          path.forEach(f => Object.keys(f.state).forEach(k => allVarKeys.add(k)));
-          const sortedVarKeys = Array.from(allVarKeys).sort();
+          const sortedVarKeys = allVarKeys;
 
           return (
             <div className="fixed inset-0 z-50 flex flex-col bg-slate-950 overflow-hidden">
@@ -379,9 +388,7 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
                 {/* Step badge */}
                 {cur && (
                   <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ml-auto ${
-                    cur.highlight === 'error'   ? 'bg-amber-500/20 text-amber-300' :
-                    cur.highlight === 'success' ? 'bg-emerald-500/20 text-emerald-300' :
-                                                  'bg-slate-700 text-slate-400'
+                    cur.highlight === 'success' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-700 text-slate-400'
                   }`}>
                     Step {frame + 1} / {path.length}
                   </span>
@@ -403,21 +410,13 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
                   {/* Current event header */}
                   {cur && (
                     <div className={`flex-shrink-0 px-4 py-3 border-b border-slate-800 ${
-                      cur.highlight === 'error'   ? 'bg-amber-900/20' :
-                      cur.highlight === 'success' ? 'bg-emerald-900/20' :
-                                                    'bg-slate-900/60'
+                      cur.highlight === 'success' ? 'bg-emerald-900/20' : 'bg-slate-900/60'
                     }`}>
                       <p className={`text-xs font-semibold mb-0.5 ${
-                        cur.highlight === 'error'   ? 'text-amber-300' :
-                        cur.highlight === 'success' ? 'text-emerald-300' :
-                                                      'text-slate-200'
+                        cur.highlight === 'success' ? 'text-emerald-300' : 'text-slate-200'
                       }`}>
-                        {cur.highlight === 'error' ? '⚑ ' : cur.highlight === 'success' ? '✓ ' : ''}
-                        {cur.event}
+                        {cur.highlight === 'success' ? '✓ ' : ''}{cur.event}
                       </p>
-                      {cur.highlight === 'error' && (
-                        <p className="text-[11px] text-amber-400/70 mt-0.5">This is where it goes wrong</p>
-                      )}
                     </div>
                   )}
 
@@ -428,25 +427,22 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
                     </p>
                     {userCode && (
                       <div className="space-y-0">
-                        {userCode.split('\n').map((line, i) => {
+                        {userCode.split('\n').filter(l => l.trim() !== '').map((line, i) => {
                           const lineNum = i + 1;
                           const isActive = cur && lineNum === cur.line;
-                          const isError  = isActive && cur?.highlight === 'error';
                           return (
                             <div key={lineNum} className={`flex items-start gap-2 rounded px-1.5 py-0.5 ${
-                              isError  ? 'bg-amber-900/40' :
-                              isActive ? 'bg-sky-900/40'   : ''
+                              isActive ? 'bg-sky-900/40' : ''
                             }`}>
                               <span className={`text-[11px] font-mono select-none w-5 text-right flex-shrink-0 mt-px ${
-                                isActive ? (isError ? 'text-amber-400' : 'text-cyan-400') : 'text-slate-600'
+                                isActive ? 'text-cyan-400' : 'text-slate-600'
                               }`}>
                                 {lineNum}
                               </span>
                               <span className={`font-mono text-xs leading-snug whitespace-pre ${
-                                isError  ? 'text-amber-200' :
-                                isActive ? 'text-cyan-200'  : 'text-slate-400'
+                                isActive ? 'text-cyan-200' : 'text-slate-400'
                               }`}>
-                                {line || ' '}
+                                {line}
                               </span>
                             </div>
                           );
@@ -473,7 +469,7 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
                         <button key={i} onClick={() => setFrame(i)} title={f.event}
                           className={`rounded-full ${
                             i === frame
-                              ? `w-3 h-3 ${f.highlight === 'error' ? 'bg-amber-400' : f.highlight === 'success' ? 'bg-emerald-400' : 'bg-cyan-400'}`
+                              ? `w-3 h-3 ${f.highlight === 'success' ? 'bg-emerald-400' : 'bg-cyan-400'}`
                               : i < frame ? 'w-2 h-2 bg-slate-600' : 'w-2 h-2 bg-slate-800'
                           }`}
                         />
@@ -491,43 +487,43 @@ export default function AnimatedDiagram({ code, path, userCode, testInput, expec
 
                   <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
                     {sortedVarKeys.map((key) => {
-                      const val = cur?.state[key];
-                      const prev = prevFrame?.state[key];
-                      const changed = prev !== undefined && val !== undefined && JSON.stringify(val) !== JSON.stringify(prev);
-                      const isError = cur?.highlight === 'error';
-                      const hasValue = val !== undefined;
+                      const val        = curState[key];
+                      const prevVal    = frame > 0 ? prevState[key] : undefined;
+                      const changed    = prevVal !== undefined && val !== undefined && JSON.stringify(val) !== JSON.stringify(prevVal);
+                      const comparing  = cur?.comparing?.includes(key) ?? false;
+                      const hasValue   = val !== undefined;
 
                       return (
                         <div key={key} className={`rounded-lg border px-3 py-2 ${
-                          !hasValue               ? 'border-slate-800/50 bg-slate-900/20 opacity-50' :
-                          changed && isError      ? 'border-amber-700/40 bg-amber-900/10' :
-                          changed                 ? 'border-cyan-800/40 bg-cyan-900/10' :
-                                                    'border-slate-800 bg-slate-900/40'
+                          !hasValue  ? 'border-slate-800/50 bg-slate-900/20 opacity-50' :
+                          comparing  ? 'border-sky-500/50 bg-sky-900/20' :
+                          changed    ? 'border-cyan-800/40 bg-cyan-900/10' :
+                                       'border-slate-800 bg-slate-900/40'
                         }`}>
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-[10px] font-mono font-medium text-slate-500">
+                            <span className={`text-[10px] font-mono font-medium ${comparing ? 'text-sky-400' : 'text-slate-500'}`}>
+                              {comparing && <span className="mr-1">↔</span>}
                               {key}
                             </span>
-                            {changed && (
-                              <span className={`text-[9px] font-medium ${isError ? 'text-amber-500' : 'text-cyan-600'}`}>
-                                changed
-                              </span>
+                            {comparing && (
+                              <span className="text-[9px] font-medium text-sky-500">checking</span>
+                            )}
+                            {!comparing && changed && (
+                              <span className="text-[9px] font-medium text-cyan-600">changed</span>
                             )}
                           </div>
 
                           {hasValue ? (
                             <div className="mt-1">
-                              {/* Previous value (strikethrough) if it changed */}
-                              {changed && prev !== undefined && (
+                              {changed && prevVal !== undefined && (
                                 <p className="text-[11px] font-mono text-slate-600 line-through leading-snug">
-                                  {prev}
+                                  {prevVal}
                                 </p>
                               )}
-                              {/* Current value */}
                               <p className={`text-sm font-mono font-semibold leading-snug break-all ${
-                                changed && isError   ? 'text-amber-300' :
-                                changed             ? 'text-cyan-300' :
-                                                      'text-slate-300'
+                                comparing  ? 'text-sky-200' :
+                                changed    ? 'text-cyan-300' :
+                                             'text-slate-300'
                               }`}>
                                 {val}
                               </p>

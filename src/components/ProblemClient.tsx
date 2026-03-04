@@ -634,9 +634,17 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
                     <span className="text-sm font-medium text-slate-100">Failed Test Case {idx + 1}</span>
                   </div>
                   {result.error ? (
-                    <div className="bg-slate-900 p-3 rounded-xl">
-                      <div className="text-xs text-slate-500 mb-1">Error</div>
-                      <pre className="text-sm font-mono text-rose-400 whitespace-pre-wrap">{result.error}</pre>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="text-xs text-slate-400 mb-1">Input</div>
+                        <pre className="bg-slate-900 p-2 rounded-xl text-xs font-mono text-slate-300">
+                          {formatTestInput(result.input)}
+                        </pre>
+                      </div>
+                      <div className="bg-slate-900 p-3 rounded-xl">
+                        <div className="text-xs text-slate-500 mb-1">Error</div>
+                        <pre className="text-sm font-mono text-rose-400 whitespace-pre-wrap">{result.error}</pre>
+                      </div>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -660,6 +668,66 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
                           </pre>
                         </div>
                       </div>
+
+                      {vizLoading !== result.testCaseId && !vizResults[result.testCaseId] && (
+                        <div className="space-y-1.5">
+                          <button
+                            onClick={() => visualize(result.testCaseId, result.input, result.expected)}
+                            className="flex items-center gap-1.5 text-xs text-cyan-600 hover:text-cyan-700 bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 px-3 py-1.5 rounded-xl transition-colors font-medium"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Visualize
+                          </button>
+                          <p className="text-[10px] text-slate-400 italic">
+                            Takes longer & uses more tokens. Choose the test case you most want to understand.
+                          </p>
+                          {vizErrors[result.testCaseId] && (
+                            <p className="text-xs text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl">
+                              {vizErrors[result.testCaseId]}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {vizLoading === result.testCaseId && (
+                        <div className="flex items-center gap-2 text-xs text-slate-500 py-1">
+                          <div className="flex gap-1">
+                            {[0, 1, 2].map((i) => (
+                              <div key={i} className="w-1 h-3 bg-cyan-500 rounded-full animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
+                            ))}
+                          </div>
+                          Tracing execution…
+                        </div>
+                      )}
+
+                      {vizResults[result.testCaseId] && (
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs text-cyan-600 font-medium flex items-center gap-1">
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                              Trace
+                            </span>
+                            <button
+                              onClick={() => setVizResults((prev) => { const next = { ...prev }; delete next[result.testCaseId]; return next; })}
+                              className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                            >
+                              Dismiss
+                            </button>
+                          </div>
+                          <VisualizationView
+                            data={vizResults[result.testCaseId]}
+                            passed={false}
+                            expectedOutput={result.expected}
+                            actualOutput={result.actual}
+                            testInput={result.input}
+                            userCode={code}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -741,9 +809,17 @@ export default function ProblemClient({ problem, savedCode, savedAlgorithm, save
                       </div>
 
                       {result.error ? (
-                        <div className="bg-slate-900 p-3 rounded-xl">
-                          <div className="text-xs text-slate-500 mb-1">Error</div>
-                          <pre className="text-sm font-mono text-rose-400 whitespace-pre-wrap">{result.error}</pre>
+                        <div className="space-y-3">
+                          <div>
+                            <div className="text-xs text-slate-400 mb-1">Input</div>
+                            <pre className="bg-slate-900 p-2 rounded-xl text-xs font-mono text-slate-300">
+                              {formatTestInput(result.input)}
+                            </pre>
+                          </div>
+                          <div className="bg-slate-900 p-3 rounded-xl">
+                            <div className="text-xs text-slate-500 mb-1">Error</div>
+                            <pre className="text-sm font-mono text-rose-400 whitespace-pre-wrap">{result.error}</pre>
+                          </div>
                         </div>
                       ) : (
                         <div className="space-y-3">

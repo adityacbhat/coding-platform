@@ -7,6 +7,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "exec-server": "node execution-server/server.js",
     "db:seed": "npx tsx prisma/seed.ts",
     "import:problems": "npx tsx scripts/import-problems.ts",
     "scrape:leetcode": "npx tsx scripts/scrape-leetcode.ts"

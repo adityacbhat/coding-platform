@@ -3,11 +3,12 @@ import { prisma } from '@/lib/db';
 import { createClient } from '@/lib/supabase/server';
 
 const WANDBOX_API = 'https://wandbox.org/api/compile.json';
-
 const WANDBOX_COMPILER: Record<string, string> = {
   python: 'cpython-3.12.7',
   javascript: 'nodejs-20.17.0',
 };
+
+const PYTHON_EXEC_SERVER_URL = (process.env.PYTHON_EXEC_SERVER_URL ?? '').replace(/\/$/, '');
 
 type TestResult = {
   testCaseId: number;
@@ -17,6 +18,55 @@ type TestResult = {
   actual: unknown;
   error?: string;
 };
+
+async function executeCode(code: string, language: string): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+  if (language === 'python' && PYTHON_EXEC_SERVER_URL) {
+    try {
+      const res = await fetch(`${PYTHON_EXEC_SERVER_URL}/execute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return { stdout: data.stdout ?? '', stderr: data.stderr ?? '', exitCode: data.exitCode ?? 0 };
+      }
+    } catch {
+      // local server is down — fall through to Wandbox
+    }
+  }
+
+  const res = await fetch(WANDBOX_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ compiler: WANDBOX_COMPILER[language], code }),
+  });
+  const data = await res.json();
+  return {
+    stdout: data.program_output ?? '',
+    stderr: data.program_error ?? data.compiler_error ?? '',
+    exitCode: Number(data.status ?? 0),
+  };
+}
+
+async function runTestCase(
+  code: string,
+  language: string,
+  input: Record<string, unknown>,
+  expectedOutput: unknown
+): Promise<{ passed: boolean; actual: unknown; error?: string }> {
+  const wrappedCode = wrapCodeWithTestRunner(code, language, input);
+  const { stdout, stderr, exitCode } = await executeCode(wrappedCode, language);
+
+  if (exitCode !== 0 || stderr) {
+    return { passed: false, actual: null, error: stderr || 'Runtime error' };
+  }
+
+  const actualOutput = parseOutput(stdout.trim());
+  const passed = compareOutputs(actualOutput, expectedOutput);
+  return { passed, actual: actualOutput };
+}
 
 export async function POST(request: NextRequest) {
   const { code, language, problemSlug, runHidden = false } = await request.json();
@@ -43,30 +93,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Problem not found' }, { status: 404 });
   }
 
-  const results: TestResult[] = [];
-  let allPassed = true;
+  const results: TestResult[] = await Promise.all(
+    problem.testCases.map(async (testCase) => {
+      const result = await runTestCase(code, language, testCase.input as Record<string, unknown>, testCase.expectedOutput);
+      return {
+        testCaseId: testCase.id,
+        passed: result.passed,
+        input: testCase.input as Record<string, unknown>,
+        expected: testCase.expectedOutput,
+        actual: result.actual,
+        error: result.error,
+      };
+    })
+  );
 
-  for (const testCase of problem.testCases) {
-    const result = await runTestCase(code, language, testCase.input as Record<string, unknown>, testCase.expectedOutput);
-
-    results.push({
-      testCaseId: testCase.id,
-      passed: result.passed,
-      input: testCase.input as Record<string, unknown>,
-      expected: testCase.expectedOutput,
-      actual: result.actual,
-      error: result.error,
-    });
-
-    if (!result.passed) allPassed = false;
-  }
+  const allPassed = results.every((r) => r.passed);
 
   // Persist progress for authenticated users
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (user) {
-    // Ensure user row exists in our custom users table (synced from Supabase Auth)
     await prisma.user.upsert({
       where: { id: user.id },
       update: {},
@@ -77,7 +124,6 @@ export async function POST(request: NextRequest) {
       where: { userId_problemId: { userId: user.id, problemId: problem.id } },
     });
 
-    // Only mark as 'solved' on a full Submit (runHidden: true), never on a Run
     const newStatus = runHidden && allPassed
       ? 'solved'
       : (existing?.status === 'solved' ? 'solved' : 'attempted');
@@ -111,7 +157,6 @@ export async function POST(request: NextRequest) {
       WHERE user_id = ${user.id} AND problem_id = ${problem.id}
     `;
 
-    // Save full submission record only on submit (hidden test cases)
     if (runHidden) {
       await prisma.submission.create({
         data: {
@@ -134,47 +179,12 @@ export async function POST(request: NextRequest) {
   });
 }
 
-async function runTestCase(
-  code: string,
-  language: string,
-  input: Record<string, unknown>,
-  expectedOutput: unknown
-): Promise<{ passed: boolean; actual: unknown; error?: string }> {
-  const wrappedCode = wrapCodeWithTestRunner(code, language, input);
-
-  const response = await fetch(WANDBOX_API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      compiler: WANDBOX_COMPILER[language],
-      code: wrappedCode,
-    }),
-  });
-
-  const data = await response.json();
-
-  const stdout: string = data.program_output ?? '';
-  const stderr: string = data.program_error ?? data.compiler_error ?? '';
-  const exitCode: number = Number(data.status ?? 0);
-
-  if (exitCode !== 0 || stderr) {
-    return { passed: false, actual: null, error: stderr || 'Runtime error' };
-  }
-
-  const actualOutput = parseOutput(stdout.trim());
-  const passed = compareOutputs(actualOutput, expectedOutput);
-
-  return { passed, actual: actualOutput };
-}
-
 function wrapCodeWithTestRunner(code: string, language: string, input: Record<string, unknown>): string {
   if (language === 'python') {
     const inputSetup = Object.entries(input)
       .map(([key, value]) => `${key} = ${JSON.stringify(value)}`)
       .join('\n');
-
     const solutionCall = generatePythonSolutionCall(code, input);
-
     return `
 import json
 from typing import List, Optional
@@ -191,9 +201,7 @@ print(json.dumps(result))
     const inputSetup = Object.entries(input)
       .map(([key, value]) => `const ${key} = ${JSON.stringify(value)};`)
       .join('\n');
-
     const solutionCall = generateJsSolutionCall(code, input);
-
     return `
 ${code}
 
@@ -238,10 +246,8 @@ function compareOutputs(actual: unknown, expected: unknown): boolean {
     if (actual.length !== expected.length) return false;
     return actual.every((val, idx) => compareOutputs(val, expected[idx]));
   }
-
   if (typeof actual === 'number' && typeof expected === 'number') {
     return Math.abs(actual - expected) < 0.00001;
   }
-
   return JSON.stringify(actual) === JSON.stringify(expected);
 }
