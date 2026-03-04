@@ -175,21 +175,5 @@ Final checks before responding:
 
   const visualization: VisualizationData = JSON.parse(jsonrepair(rawText));
 
-  // Write debug output to file
-  const fs = await import('fs');
-  const debugOutput = `=== RAW LLM OUTPUT ===
-${content.text}
-
-=== MERMAID FLOWCHART ===
-${visualization.mermaid.flowchart}
-
-=== EXECUTION PATH ===
-${JSON.stringify(visualization.execution_path, null, 2)}
-
-=== FULL VISUALIZATION ===
-${JSON.stringify(visualization, null, 2)}
-`;
-  fs.writeFileSync('llm-debug-output.txt', debugOutput);
-
   return NextResponse.json({ visualization });
 }
